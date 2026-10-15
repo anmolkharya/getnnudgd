@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="220" viewBox="0 0 360 220" role="img" aria-label="Resume ATS score card showing 92 out of 100, ATS ready">
+  <defs>
+    <filter id="s" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#000" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+  <rect x="10" y="10" width="340" height="200" rx="16" fill="#FFFFFF" filter="url(#s)"/>
+  <text x="32" y="46" font-family="Inter, system-ui, -apple-system, Segoe UI, sans-serif" font-size="12" fill="#6B7280" font-weight="600">ATS score</text>
+  <text x="32" y="92" font-family="Inter, system-ui, -apple-system, Segoe UI, sans-serif" fill="#111827" font-weight="700"><tspan font-size="40">92</tspan><tspan font-size="18" fill="#4F46E5"> / ATS ready</tspan></text>
+  <rect x="32" y="110" width="296" height="8" rx="4" fill="#E5E7EB"/>
+  <rect x="32" y="110" width="272" height="8" rx="4" fill="#4F46E5"/>
+  <rect x="32" y="136" width="128" height="26" rx="13" fill="#EEF2FF"/>
+  <text x="96" y="153" text-anchor="middle" font-family="Inter, system-ui, -apple-system, Segoe UI, sans-serif" font-size="12" fill="#4F46E5" font-weight="700">Resume reviewed</text>
+  <rect x="32" y="176" width="200" height="6" rx="3" fill="#E5E7EB"/>
+  <rect x="32" y="190" width="150" height="6" rx="3" fill="#E5E7EB"/>
+</svg>

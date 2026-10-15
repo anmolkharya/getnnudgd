@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="220" viewBox="0 0 360 220" role="img" aria-label="Insider profile card: Verified Insider, SDE-2">
+  <defs>
+    <filter id="s" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#000" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+  <rect x="10" y="10" width="340" height="200" rx="16" fill="#FFFFFF" filter="url(#s)"/>
+  <text x="32" y="46" font-family="Inter, system-ui, -apple-system, Segoe UI, sans-serif" font-size="12" fill="#6B7280" font-weight="600">Insiders</text>
+  <circle cx="58" cy="100" r="22" fill="#111827"/>
+  <text x="58" y="106" text-anchor="middle" font-family="Inter, system-ui, -apple-system, Segoe UI, sans-serif" font-size="16" fill="#FFFFFF" font-weight="700">I</text>
+  <text x="96" y="94" font-family="Inter, system-ui, -apple-system, Segoe UI, sans-serif" font-size="16" fill="#111827" font-weight="700">Verified Insider</text>
+  <text x="96" y="116" font-family="Inter, system-ui, -apple-system, Segoe UI, sans-serif" font-size="13" fill="#6B7280">SDE-2</text>
+  <rect x="32" y="144" width="296" height="1" fill="#E5E7EB"/>
+  <rect x="32" y="162" width="92" height="24" rx="12" fill="#EEF2FF"/>
+  <text x="78" y="178" text-anchor="middle" font-family="Inter, system-ui, -apple-system, Segoe UI, sans-serif" font-size="12" fill="#4F46E5" font-weight="700">vouch ready</text>
+</svg>

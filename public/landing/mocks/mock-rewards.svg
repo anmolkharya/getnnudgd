@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="220" viewBox="0 0 360 220" role="img" aria-label="Points wallet card showing 1,250 points">
+  <defs>
+    <filter id="s" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#000" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+  <rect x="10" y="10" width="340" height="200" rx="16" fill="#FFFFFF" filter="url(#s)"/>
+  <text x="32" y="46" font-family="Inter, system-ui, -apple-system, Segoe UI, sans-serif" font-size="12" fill="#6B7280" font-weight="600">Points wallet</text>
+  <text x="32" y="98" font-family="Inter, system-ui, -apple-system, Segoe UI, sans-serif" font-size="40" fill="#111827" font-weight="700">1,250</text>
+  <text x="32" y="122" font-family="Inter, system-ui, -apple-system, Segoe UI, sans-serif" font-size="14" fill="#6B7280">points</text>
+  <rect x="32" y="144" width="296" height="1" fill="#E5E7EB"/>
+  <text x="32" y="172" font-family="Inter, system-ui, -apple-system, Segoe UI, sans-serif" font-size="13" fill="#6B7280">Redeem for gift cards</text>
+  <rect x="262" y="156" width="66" height="26" rx="13" fill="#4F46E5"/>
+  <text x="295" y="173" text-anchor="middle" font-family="Inter, system-ui, -apple-system, Segoe UI, sans-serif" font-size="12" fill="#FFFFFF" font-weight="700">Redeem</text>
+</svg>
