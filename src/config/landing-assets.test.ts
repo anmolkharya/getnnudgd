@@ -99,13 +99,30 @@ describe("landing-assets manifest", () => {
     }
   });
 
-  it("uses only the locked vocabulary in mock artwork", () => {
-    const banned = /referral|refer|payout|coins?/i;
+  it("uses only the locked vocabulary in alt text and mock artwork", () => {
+    const banned = /\brefer(s|red|ral|rer|ring)?\b|referr|payout|\bcoins?\b/i;
+    for (const key of PHOTO_KEYS) {
+      const p = photos[key as keyof typeof photos];
+      expect(p.alt, `${key} alt`).not.toMatch(banned);
+    }
     for (const key of MOCK_KEYS) {
       const m = mocks[key as keyof typeof mocks];
+      expect(m.alt, `${key} alt`).not.toMatch(banned);
       const svg = fs.readFileSync(toDisk(m.src), "utf8");
       expect(svg, key).not.toMatch(banned);
       expect(svg.length, `${key} size`).toBeLessThan(30 * 1024);
+    }
+  });
+
+  it("keeps every photo variant under 200 KB", () => {
+    for (const key of PHOTO_KEYS) {
+      const p = photos[key as keyof typeof photos];
+      for (const w of [800, 1600] as const) {
+        for (const file of [p.avif[w], p.webp[w]]) {
+          const size = fs.statSync(toDisk(file)).size;
+          expect(size, `${file} size`).toBeLessThan(200 * 1024);
+        }
+      }
     }
   });
 

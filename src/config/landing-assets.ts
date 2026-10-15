@@ -31,25 +31,26 @@ export type MockKey =
   | "mock-rewards"
   | "mock-whatsapp";
 
-export type PhotoAsset = {
-  avif: { 800: string; 1600: string };
-  webp: { 800: string; 1600: string };
+export type PhotoAsset = Readonly<{
+  avif: Readonly<{ 800: string; 1600: string }>;
+  webp: Readonly<{ 800: string; 1600: string }>;
   width: number;
   height: number;
   alt: string;
   credit: string;
-};
+}>;
 
-export type LogoAsset =
+export type LogoAsset = Readonly<
   | { type: "svg"; src: string; name: string }
-  | { type: "text"; name: string };
+  | { type: "text"; name: string }
+>;
 
-export type MockAsset = {
+export type MockAsset = Readonly<{
   src: string;
   width: number;
   height: number;
   alt: string;
-};
+}>;
 
 const HERO_W = 1600;
 const HERO_H = 900;
@@ -57,7 +58,7 @@ const FEATURE_W = 1600;
 const FEATURE_H = 2000;
 
 function photo(
-  key: string,
+  key: PhotoKey,
   width: number,
   height: number,
   alt: string,
@@ -79,33 +80,33 @@ function photo(
   };
 }
 
-export const photos: Record<PhotoKey, PhotoAsset> = {
+export const photos: Readonly<Record<PhotoKey, PhotoAsset>> = {
   "hero-resume": photo(
     "hero-resume",
     HERO_W,
     HERO_H,
-    "A man in a turban works on a laptop at a desk at home, focused on his resume work.",
+    "A man in a turban, seen from behind, works on a laptop at a small desk against a green wall at home.",
     "Photo by Ketut Subiyanto on Pexels",
   ),
   "hero-find-insider": photo(
     "hero-find-insider",
     HERO_W,
     HERO_H,
-    "Two young Indian coworkers talk over a laptop in a bright, modern office.",
+    "A young Indian woman and a man in a turban smile as they work together over a laptop and notebook at a wooden table at home.",
     "Photo by Ketut Subiyanto on Pexels",
   ),
   "hero-request": photo(
     "hero-request",
     HERO_W,
     HERO_H,
-    "A person scrolls a smartphone outdoors at night, with blurred city lights behind.",
+    "A hand holds a smartphone showing a photo feed, with warm blurred lights in the background.",
     "Photo by Ahmed Aqtai on Pexels",
   ),
   "hero-vouch": photo(
     "hero-vouch",
     HERO_W,
     HERO_H,
-    "Two coworkers exchange a handshake in a modern corporate office.",
+    "A woman and a man shake hands across a meeting table in a high-rise office.",
     "Photo by Mikhail Nilov on Pexels",
   ),
   "hero-rewards": photo(
@@ -133,14 +134,14 @@ export const photos: Record<PhotoKey, PhotoAsset> = {
     "feature-insiders",
     FEATURE_W,
     FEATURE_H,
-    "A sunset over the Mumbai coast, with a hand in the foreground.",
+    "A raised hand in the foreground of a rocky seafront at sunset, with distant city towers on the shore.",
     "Photo by Bhavitya Indora on Pexels",
   ),
   "feature-requests": photo(
     "feature-requests",
     FEATURE_W,
     FEATURE_H,
-    "A Bengaluru city skyline under a warm sunset sky with clouds.",
+    "A city skyline at dusk under a pink and orange sky with scattered clouds.",
     "Photo by Umar Andrabi on Pexels",
   ),
   "feature-rewards": photo(
@@ -166,7 +167,7 @@ export const photos: Record<PhotoKey, PhotoAsset> = {
   ),
 };
 
-export const logos: Record<LogoKey, LogoAsset> = {
+export const logos: Readonly<Record<LogoKey, LogoAsset>> = {
   "logo-razorpay": { type: "svg", src: "/landing/logos/logo-razorpay.svg", name: "Razorpay" },
   "logo-phonepe": { type: "svg", src: "/landing/logos/logo-phonepe.svg", name: "PhonePe" },
   "logo-zerodha": { type: "svg", src: "/landing/logos/logo-zerodha.svg", name: "Zerodha" },
@@ -179,12 +180,12 @@ export const logos: Record<LogoKey, LogoAsset> = {
   "logo-meesho": { type: "text", name: "Meesho" },
 };
 
-export const mocks: Record<MockKey, MockAsset> = {
+export const mocks: Readonly<Record<MockKey, MockAsset>> = {
   "mock-resume": {
     src: "/landing/mocks/mock-resume.svg",
     width: 360,
     height: 220,
-    alt: "A resume ATS score card showing 92 out of 100, marked ATS ready.",
+    alt: "A resume ATS score card showing a score of 92, marked ATS ready.",
   },
   "mock-insiders": {
     src: "/landing/mocks/mock-insiders.svg",
