@@ -4,114 +4,366 @@ import { brand } from "./brand";
 // Business numbers (response window, tranche count, prices, credit costs) are
 // owned by app_config. Anything that mentions one is a placeholder here.
 
+// ---------------------------------------------------------------------------
+// Shared types and key unions
+// ---------------------------------------------------------------------------
+
+export type LinkTarget = "anchor" | "route" | "external" | "mailto";
+export type FeedTone = "green" | "orange" | "indigo" | "neutral";
+
+export const sectionIds = [
+  "how-it-works",
+  "resume",
+  "insiders",
+  "requests",
+  "rewards",
+  "whatsapp",
+  "faq",
+] as const;
+export type SectionId = (typeof sectionIds)[number];
+
+export const heroImageKeys = [
+  "hero-resume",
+  "hero-find-insider",
+  "hero-request",
+  "hero-vouch",
+  "hero-rewards",
+  "hero-whatsapp",
+] as const;
+export type HeroImageKey = (typeof heroImageKeys)[number];
+
+export const featureImageKeys = [
+  "feature-resume",
+  "feature-insiders",
+  "feature-requests",
+  "feature-rewards",
+  "feature-whatsapp",
+] as const;
+export type FeatureImageKey = (typeof featureImageKeys)[number];
+
+export const mockKeys = [
+  "mock-resume",
+  "mock-insiders",
+  "mock-requests",
+  "mock-rewards",
+  "mock-whatsapp",
+] as const;
+export type MockKey = (typeof mockKeys)[number];
+
+export const logoKeys = [
+  "logo-razorpay",
+  "logo-phonepe",
+  "logo-zerodha",
+  "logo-freshworks",
+  "logo-groww",
+  "logo-zomato",
+  "logo-swiggy",
+  "logo-cred",
+  "logo-flipkart",
+  "logo-meesho",
+] as const;
+export type LogoKey = (typeof logoKeys)[number];
+
+// Sections whose content is placeholder data and must be confirmed before launch.
+export const PLACEHOLDER_SECTIONS = ["counter", "logos", "liveFeed", "stats"] as const;
+export type PlaceholderSection = (typeof PLACEHOLDER_SECTIONS)[number];
+
+export interface LinkItem {
+  readonly label: string;
+  readonly href: string;
+  readonly target: LinkTarget;
+}
+
+export interface DropdownItem {
+  readonly number: string;
+  readonly name: string;
+  readonly oneLiner: string;
+  readonly href: string;
+  readonly target: LinkTarget;
+}
+
+export type NavLink =
+  | {
+      readonly kind: "dropdown";
+      readonly label: string;
+      readonly href: string;
+      readonly target: LinkTarget;
+      readonly items: readonly DropdownItem[];
+    }
+  | {
+      readonly kind: "link";
+      readonly label: string;
+      readonly href: string;
+      readonly target: LinkTarget;
+    };
+
+export interface NavConfig {
+  readonly links: readonly NavLink[];
+  readonly cta: LinkItem;
+}
+
+export interface WordmarkConfig {
+  readonly text: string;
+}
+
+export interface HeroSlideConfig {
+  readonly id: string;
+  readonly number: string;
+  readonly label: string;
+  readonly title: string;
+  readonly imageKey: HeroImageKey;
+  readonly href: string;
+  readonly target: LinkTarget;
+}
+
+export interface LogoItem {
+  readonly name: string;
+  readonly logoKey: LogoKey;
+}
+
+export interface LogosConfig {
+  readonly heading: string;
+  readonly disclaimer: string;
+  readonly placeholder: boolean;
+  readonly items: readonly LogoItem[];
+}
+
+export interface FeatureCardConfig {
+  readonly title: string;
+  readonly body: string;
+  readonly cta: LinkItem;
+  readonly imageKey: FeatureImageKey;
+  readonly mockKey: MockKey;
+}
+
+export interface FeaturesConfig {
+  readonly heading: string;
+  readonly sub: string;
+  readonly cta: LinkItem;
+  readonly cards: readonly FeatureCardConfig[];
+}
+
+export interface FeedRowConfig {
+  readonly label: string;
+  readonly detail: string;
+  readonly tone: FeedTone;
+}
+
+export interface LiveFeedConfig {
+  readonly title: string;
+  readonly body: string;
+  readonly placeholder: boolean;
+  readonly rows: readonly FeedRowConfig[];
+}
+
+export interface StatItem {
+  readonly value: number;
+  readonly suffix: string;
+  readonly label: string;
+}
+
+export interface StatsConfig {
+  readonly title: string;
+  readonly body: string;
+  readonly placeholder: boolean;
+  readonly items: readonly StatItem[];
+}
+
+export interface PurposeBuiltConfig {
+  readonly title: string;
+  readonly body: string;
+  readonly phrases: readonly string[];
+}
+
+export interface TitleBody {
+  readonly title: string;
+  readonly body: string;
+}
+
+export interface BentoConfig {
+  readonly headingSans: string;
+  readonly headingSerif: string;
+  readonly sub: string;
+  readonly liveFeed: LiveFeedConfig;
+  readonly stats: StatsConfig;
+  readonly purposeBuilt: PurposeBuiltConfig;
+  readonly evolve: TitleBody;
+  readonly chip: TitleBody;
+}
+
+export interface CounterConfig {
+  readonly statement: string;
+  readonly value: number;
+  readonly from: number;
+  readonly caption: string;
+  readonly placeholder: boolean;
+}
+
+export interface FaqItemConfig {
+  readonly q: string;
+  readonly a: string;
+  readonly needsLegalReview?: boolean;
+}
+
+export interface FaqConfig {
+  readonly headingSans: string;
+  readonly headingSerif: string;
+  readonly sub: string;
+  readonly contact: {
+    readonly title: string;
+    readonly body: string;
+    readonly cta: LinkItem;
+  };
+  readonly items: readonly FaqItemConfig[];
+}
+
+export interface FooterLink {
+  readonly label: string;
+  readonly href: string;
+  readonly target: LinkTarget;
+}
+
+export interface FooterColumn {
+  readonly title: string;
+  readonly links: readonly FooterLink[];
+}
+
+export interface FooterConfig {
+  readonly headingSerif: string;
+  readonly headingSans: string;
+  readonly sub: string;
+  readonly cta: LinkItem;
+  readonly columns: readonly FooterColumn[];
+  readonly wordmark: string;
+}
+
+// ---------------------------------------------------------------------------
+// Content
+// ---------------------------------------------------------------------------
+
 export const nav = {
   links: [
     {
+      kind: "dropdown",
       label: "How it works",
       href: "#how-it-works",
+      target: "anchor",
       items: [
         {
           number: "01",
           name: "Resume tailoring",
           oneLiner: "A free, ATS-friendly resume for every job post.",
           href: "#resume",
+          target: "anchor",
         },
         {
           number: "02",
           name: "Find an Insider",
           oneLiner: "Find the people who already work at your target company.",
           href: "#insiders",
+          target: "anchor",
         },
         {
           number: "03",
           name: "Insider Requests",
           oneLiner: "Ask a verified Insider to submit you internally.",
           href: "#requests",
+          target: "anchor",
         },
         {
           number: "04",
           name: "Insider Rewards",
-          oneLiner: "Insiders earn points for every vouch that lands.",
+          oneLiner: "Insiders earn points once a vouch is verified.",
           href: "#rewards",
+          target: "anchor",
         },
         {
           number: "05",
           name: "Start on WhatsApp",
           oneLiner: "Begin the whole flow in the chat you already use.",
           href: "#whatsapp",
+          target: "anchor",
         },
         {
           number: "06",
           name: "For Insiders",
           oneLiner: "Verify your company email and start earning points.",
           href: "/for-insiders",
+          target: "route",
         },
       ],
     },
-    { label: "For Insiders", href: "/for-insiders" },
-    { label: "FAQ", href: "#faq" },
+    { kind: "link", label: "For Insiders", href: "/for-insiders", target: "route" },
+    { kind: "link", label: "FAQ", href: "#faq", target: "anchor" },
   ],
-  cta: { label: brand.ctaGetVouched, href: "/login" },
-} as const;
+  cta: { label: brand.ctaGetVouched, href: "/login", target: "route" },
+} as const satisfies NavConfig;
 
 export const wordmark = {
   text: `${brand.ctaGetVouched}.`,
-} as const;
+} as const satisfies WordmarkConfig;
 
 export const heroSlides = [
   {
-    id: "resume",
+    id: "slide-resume",
     number: "01",
     label: "Resume",
     title: "A resume tailored to every job.",
     imageKey: "hero-resume",
     href: "/login",
+    target: "route",
   },
   {
-    id: "find-insider",
+    id: "slide-find-insider",
     number: "02",
     label: "Find an Insider",
     title: "Find the Insider inside.",
     imageKey: "hero-find-insider",
     href: "/login",
+    target: "route",
   },
   {
-    id: "request",
+    id: "slide-request",
     number: "03",
     label: "Insider Request",
     title: "Send a request that gets read.",
     imageKey: "hero-request",
     href: "/login",
+    target: "route",
   },
   {
-    id: "vouch",
+    id: "slide-vouch",
     number: "04",
     label: "Vouch",
     title: "Get vouched in, not ghosted.",
     imageKey: "hero-vouch",
     href: "/for-insiders",
+    target: "route",
   },
   {
-    id: "rewards",
+    id: "slide-rewards",
     number: "05",
     label: "Rewards",
-    title: "Earn points for every vouch.",
+    title: "Earn points for every verified vouch.",
     imageKey: "hero-rewards",
     href: "/for-insiders",
+    target: "route",
   },
   {
-    id: "whatsapp",
+    id: "slide-whatsapp",
     number: "06",
     label: "WhatsApp",
     title: "Start the whole thing on WhatsApp.",
     imageKey: "hero-whatsapp",
     href: "/login",
+    target: "route",
   },
-] as const;
+] as const satisfies readonly HeroSlideConfig[];
 
 export const logos = {
   heading: "Insiders work at",
   disclaimer: `Logos are trademarks of their respective owners. ${brand.name} is not affiliated with or endorsed by these companies.`,
+  placeholder: true, // placeholder: founder to confirm before launch
   items: [
     { name: "Razorpay", logoKey: "logo-razorpay" },
     { name: "PhonePe", logoKey: "logo-phonepe" },
@@ -124,58 +376,59 @@ export const logos = {
     { name: "Flipkart", logoKey: "logo-flipkart" },
     { name: "Meesho", logoKey: "logo-meesho" },
   ],
-} as const;
+} as const satisfies LogosConfig;
 
 export const features = {
   heading: "Everything you need to get vouched in",
   sub: "Tailor your resume, find an Insider at the company you want, and send a request that an Insider can act on.",
-  cta: { label: brand.ctaGetVouched, href: "/login" },
+  cta: { label: brand.ctaGetVouched, href: "/login", target: "route" },
   cards: [
     {
       title: "A resume built for the job",
-      body: "Paste a job post and get an ATS-friendly resume tailored to it. The first one is free.",
-      cta: { label: "Explore", href: "#resume" },
+      body: "Paste a job post and get an ATS-friendly resume tailored to it. Your resume goes only to the Insider you ask, and through them to that company's hiring process.",
+      cta: { label: "Explore", href: "#resume", target: "anchor" },
       imageKey: "feature-resume",
       mockKey: "mock-resume",
     },
     {
       title: "Find the Insider",
       body: "See which verified Insiders work at your target company, and what their role is.",
-      cta: { label: "Explore", href: "#insiders" },
+      cta: { label: "Explore", href: "#insiders", target: "anchor" },
       imageKey: "feature-insiders",
       mockKey: "mock-insiders",
     },
     {
       title: "Send an Insider Request",
       body: "Spend credits to ask an Insider to review your profile. They accept or decline within the response window.",
-      cta: { label: "Explore", href: "#requests" },
+      cta: { label: "Explore", href: "#requests", target: "anchor" },
       imageKey: "feature-requests",
       mockKey: "mock-requests",
     },
     {
       title: "Points for every vouch",
-      body: "Insiders earn points when they submit a Seeker internally and upload proof. Points can be redeemed for gift cards.",
-      cta: { label: "Explore", href: "#rewards" },
+      body: "Insiders earn points once the proof of their vouch is verified. Points can be redeemed for gift cards.",
+      cta: { label: "Explore", href: "#rewards", target: "anchor" },
       imageKey: "feature-rewards",
       mockKey: "mock-rewards",
     },
     {
       title: "Start on WhatsApp",
       body: "Share a job post in chat and follow every step from the same thread. No new app to learn.",
-      cta: { label: "Explore", href: "#whatsapp" },
+      cta: { label: "Explore", href: "#whatsapp", target: "anchor" },
       imageKey: "feature-whatsapp",
       mockKey: "mock-whatsapp",
     },
   ],
-} as const;
+} as const satisfies FeaturesConfig;
 
 export const bento = {
   headingSans: "Everything we built",
   headingSerif: "fixes the hiring backdoor",
   sub: "Sifarish was always the shortcut. We made the process visible, fair and traceable.",
   liveFeed: {
-    title: "Live activity",
-    body: "Every Insider Request moves through clear states, so you always know where yours stands.",
+    title: "How a request moves",
+    body: "An example of the steps every Insider Request goes through.",
+    placeholder: true, // placeholder: example rows, not live data
     rows: [
       { label: "INSIDER ACCEPTED", detail: "SDE-2 AT A FINTECH, BENGALURU", tone: "green" },
       { label: "REQUEST SENT", detail: "DATA ANALYST AT AN EDTECH, HYDERABAD", tone: "neutral" },
@@ -190,12 +443,11 @@ export const bento = {
   stats: {
     title: "The network so far",
     body: "Seekers, Insiders and vouches across companies in India.",
-    placeholder: true,
-    // placeholder: real values come from app_config
+    placeholder: true, // placeholder: real values come from app_config
     items: [
-      { value: "25K+", label: "Seekers in the network" },
-      { value: "1.2K+", label: "Verified Insiders" },
-      { value: "300+", label: "Companies with an Insider" },
+      { value: 25000, suffix: "+", label: "Seekers in the network" },
+      { value: 1200, suffix: "+", label: "Verified Insiders" },
+      { value: 300, suffix: "+", label: "Companies with an Insider" },
     ],
   },
   purposeBuilt: {
@@ -209,22 +461,22 @@ export const bento = {
     ],
   },
   evolve: {
-    title: "Gets sharper with every request",
-    body: "Each accepted request and each piece of proof helps us match Seekers with the right Insiders faster.",
+    title: "Track every request in one place",
+    body: "See each Insider Request you send, from the first reply to the final vouch.",
   },
   chip: {
     title: "Your resume, your call",
-    body: "Your tailored resume is shared only with the Insider you ask. You decide what goes out.",
+    body: "Your resume goes only to the Insider you ask, and through them to that company's hiring process.",
   },
-} as const;
+} as const satisfies BentoConfig;
 
 export const counter = {
   statement: "Vouches made so far",
   value: 25000,
   from: 24000,
-  caption: "Live count from the Insider network.",
+  caption: "Seekers and Insiders on the waitlist so far.",
   placeholder: true, // placeholder: real value comes from app_config
-} as const;
+} as const satisfies CounterConfig;
 
 export const faq = {
   headingSans: "Frequently",
@@ -233,7 +485,7 @@ export const faq = {
   contact: {
     title: "Still have questions?",
     body: "Write to us and a real person will reply.",
-    cta: { label: "Email us", href: `mailto:hello@${brand.domain}` },
+    cta: { label: "Email us", href: `mailto:hello@${brand.domain}`, target: "mailto" },
   },
   items: [
     {
@@ -246,16 +498,17 @@ export const faq = {
     },
     {
       q: "What are credits, and what if an Insider declines or does not respond?",
-      a: "Credits are what you spend to send an Insider Request. If the Insider declines, or does not respond within the response window, the credits for that request come back to your balance.",
+      a: "Credits are what you spend to send an Insider Request. If the Insider declines, or does not respond within the response window, the credits for that request are refunded to your balance as per our refund policy.",
     },
     {
       q: "How do Insiders earn points?",
-      a: "Insiders earn points when they submit a Seeker internally and then upload proof of the submission. Points are released in stages and can be redeemed for gift cards.",
+      a: "Insiders earn points once the proof of their vouch is verified. Points are released in stages and can be redeemed for gift cards.",
     },
-    // confirm wording with legal before launch
+    // Legal review: the Insider submits the resume into the company's hiring process.
     {
       q: "Who can see my resume?",
-      a: "Only the Insider you send a request to sees your tailored resume for that job. Your resume is not shared with anyone else.",
+      a: "Your resume goes only to the Insider you ask, and through them to that company's hiring process.",
+      needsLegalReview: true,
     },
     {
       q: "How does WhatsApp work?",
@@ -266,55 +519,50 @@ export const faq = {
       a: "A vouch is when an Insider submits you internally for the role. It is their recommendation on your behalf, made through the company's own hiring process.",
     },
   ],
-} as const;
+} as const satisfies FaqConfig;
 
 export const footer = {
   headingSerif: "Your next role",
   headingSans: "Starts here.",
   sub: "Get a tailored resume, find an Insider, and get vouched in.",
-  cta: { label: brand.ctaGetVouched, href: "/login" },
+  cta: { label: brand.ctaGetVouched, href: "/login", target: "route" },
   columns: [
     {
       title: "Product",
       links: [
-        { label: "Resume tailoring", href: "#resume" },
-        { label: "Find an Insider", href: "#insiders" },
-        { label: "Insider Requests", href: "#requests" },
-        { label: "Insider Rewards", href: "#rewards" },
+        { label: "Resume tailoring", href: "#resume", target: "anchor" },
+        { label: "Find an Insider", href: "#insiders", target: "anchor" },
+        { label: "Insider Requests", href: "#requests", target: "anchor" },
+        { label: "Insider Rewards", href: "#rewards", target: "anchor" },
       ],
     },
     {
       title: "Company",
       links: [
-        { label: "For Insiders", href: "/for-insiders" },
-        { label: "FAQ", href: "#faq" },
-        { label: "LinkedIn", href: brand.social.linkedin },
-        { label: "Instagram", href: brand.social.instagram },
+        { label: "For Insiders", href: "/for-insiders", target: "route" },
+        { label: "FAQ", href: "#faq", target: "anchor" },
+        { label: "LinkedIn", href: brand.social.linkedin, target: "external" },
+        { label: "Instagram", href: brand.social.instagram, target: "external" },
       ],
     },
     {
       title: "Legal",
       links: [
-        { label: "Privacy", href: "/privacy" },
-        { label: "Terms", href: "/terms" },
+        { label: "Privacy", href: "/privacy", target: "route" },
+        { label: "Terms", href: "/terms", target: "route" },
       ],
     },
   ],
   wordmark: brand.name,
-} as const;
+} as const satisfies FooterConfig;
 
-export type Nav = typeof nav;
-export type NavLink = Nav["links"][number];
-export type NavDropdownItem = Nav["links"][0]["items"][number];
-export type Wordmark = typeof wordmark;
+// ---------------------------------------------------------------------------
+// Derived types
+// ---------------------------------------------------------------------------
+
+export type NavDropdownItem = Extract<NavLink, { kind: "dropdown" }>["items"][number];
 export type HeroSlide = (typeof heroSlides)[number];
-export type Logos = typeof logos;
-export type Features = typeof features;
-export type FeatureCard = Features["cards"][number];
-export type Bento = typeof bento;
-export type FeedRow = Bento["liveFeed"]["rows"][number];
-export type FeedTone = FeedRow["tone"];
-export type Counter = typeof counter;
-export type Faq = typeof faq;
-export type FaqItem = Faq["items"][number];
-export type Footer = typeof footer;
+export type FeatureCard = (typeof features.cards)[number];
+export type FeedRow = (typeof bento.liveFeed.rows)[number];
+export type FaqItem = (typeof faq.items)[number];
+export type FooterColumnConfig = (typeof footer.columns)[number];
