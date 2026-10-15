@@ -20,7 +20,7 @@ const INKS = [
   { name: "ink-6", cls: "bg-ink-6" },
 ] as const;
 
-const LOGOS = ["Razorpay", "Zerodha", "CRED", "Swiggy", "Meesho", "Groww", "PhonePe", "Zepto"];
+const LOGOS = ["A", "B", "C", "D", "E", "F", "G", "H"].map((l) => `Company ${l}`);
 
 function Label({ children }: { children: string }) {
   return <p className="font-mono text-micro uppercase text-ink-5">{children}</p>;
@@ -50,7 +50,7 @@ export default function TokenLabPage() {
         <div className="flex flex-col gap-2">
           <Label>text-display · lv-heading-pair</Label>
           <h1 className="lv-heading-pair text-display text-ink-1">
-            <span>Get vouched in</span>
+            <span>{brand.ctaGetVouched}</span>
             <em>by someone on the inside.</em>
           </h1>
         </div>
@@ -119,8 +119,8 @@ export default function TokenLabPage() {
           </div>
         </div>
 
-        <div className="mx-auto w-full max-w-container rounded-lg border border-dashed border-ink-6 p-4">
-          <Label>max-w-container (1280px) · utility form of the lv-container width</Label>
+        <div className="mx-auto w-full max-w-page rounded-lg border border-dashed border-ink-6 p-4">
+          <Label>max-w-page (1280px) · utility form of the lv-container width</Label>
         </div>
 
         <div className="flex flex-col gap-3">
