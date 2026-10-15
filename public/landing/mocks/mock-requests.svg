@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="220" viewBox="0 0 360 220" role="img" aria-label="Insider Request status card showing Accepted">
+  <defs>
+    <filter id="s" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#000" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+  <rect x="10" y="10" width="340" height="200" rx="16" fill="#FFFFFF" filter="url(#s)"/>
+  <text x="32" y="46" font-family="Inter, system-ui, -apple-system, Segoe UI, sans-serif" font-size="12" fill="#6B7280" font-weight="600">Insider Request</text>
+  <text x="32" y="84" font-family="Inter, system-ui, -apple-system, Segoe UI, sans-serif" font-size="18" fill="#111827" font-weight="700">Backend Engineer</text>
+  <text x="32" y="106" font-family="Inter, system-ui, -apple-system, Segoe UI, sans-serif" font-size="13" fill="#6B7280">Sent to a verified Insider</text>
+  <rect x="32" y="132" width="96" height="30" rx="15" fill="#4F46E5"/>
+  <text x="80" y="152" text-anchor="middle" font-family="Inter, system-ui, -apple-system, Segoe UI, sans-serif" font-size="13" fill="#FFFFFF" font-weight="700">Accepted</text>
+  <rect x="32" y="180" width="296" height="6" rx="3" fill="#E5E7EB"/>
+  <rect x="32" y="180" width="296" height="6" rx="3" fill="#4F46E5"/>
+</svg>
