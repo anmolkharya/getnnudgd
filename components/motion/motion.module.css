@@ -51,6 +51,7 @@
 
 .marquee {
   --marquee-duration: 30s;
+  --marquee-distance: -50%;
   --marquee-gap: 32px;
   display: flex;
   overflow: hidden;
@@ -128,7 +129,7 @@
     transform: translate3d(0, 0, 0);
   }
   to {
-    transform: translate3d(-50%, 0, 0);
+    transform: translate3d(var(--marquee-distance), 0, 0);
   }
 }
 
@@ -137,7 +138,47 @@
     transform: translate3d(0, 0, 0);
   }
   to {
-    transform: translate3d(0, -50%, 0);
+    transform: translate3d(0, var(--marquee-distance), 0);
+  }
+}
+
+.marquee[data-reduced="true"].marqueeX:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+}
+
+/* ---------- Autoplay progress ---------- */
+
+.autoplayTrack {
+  display: block;
+  overflow: hidden;
+}
+
+.autoplayFill {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+.autoplayFill[data-state="done"] {
+  transform: scaleX(1);
+}
+
+.autoplayFill[data-state="active"] {
+  animation-name: autoplay-fill;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+@keyframes autoplay-fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
   }
 }
 
@@ -167,6 +208,25 @@
 }
 
 /* ---------- TypeLoop ---------- */
+
+.typeStack {
+  display: inline-grid;
+  vertical-align: bottom;
+}
+
+.typeStack > * {
+  grid-area: 1 / 1;
+}
+
+.typeGhost {
+  visibility: hidden;
+  /* leave room for the caret */
+  padding-right: 4px;
+}
+
+.typeLive {
+  white-space: pre-wrap;
+}
 
 .caret {
   display: inline-block;
@@ -200,5 +260,10 @@
 
   .caret {
     animation: none;
+  }
+
+  .autoplayFill[data-state="active"] {
+    animation: none;
+    transform: scaleX(1);
   }
 }

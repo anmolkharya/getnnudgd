@@ -78,3 +78,45 @@ export function installMatchMedia({ reduced = false, coarse = false } = {}): voi
     };
   });
 }
+
+export class MockResizeObserver implements ResizeObserver {
+  static instances: MockResizeObserver[] = [];
+  readonly elements = new Set<Element>();
+  private readonly callback: ResizeObserverCallback;
+
+  constructor(callback: ResizeObserverCallback) {
+    this.callback = callback;
+    MockResizeObserver.instances.push(this);
+  }
+  observe(target: Element): void {
+    this.elements.add(target);
+  }
+  unobserve(target: Element): void {
+    this.elements.delete(target);
+  }
+  disconnect(): void {
+    this.elements.clear();
+  }
+  trigger(): void {
+    const entries = [...this.elements].map(
+      (target) => ({ target, contentRect: target.getBoundingClientRect() }) as ResizeObserverEntry,
+    );
+    if (entries.length > 0) this.callback(entries, this);
+  }
+  static triggerAll(): void {
+    for (const ro of MockResizeObserver.instances) ro.trigger();
+  }
+}
+
+export function installResizeObserver(): void {
+  MockResizeObserver.instances = [];
+  vi.stubGlobal("ResizeObserver", MockResizeObserver);
+}
+
+/** Make getBoundingClientRect return a fixed size chosen per element. */
+export function stubRects(sizeOf: (el: Element) => { width: number; height: number }) {
+  return vi.spyOn(Element.prototype, "getBoundingClientRect").mockImplementation(function (this: Element) {
+    const { width, height } = sizeOf(this);
+    return { x: 0, y: 0, top: 0, left: 0, right: width, bottom: height, width, height, toJSON: () => ({}) };
+  });
+}

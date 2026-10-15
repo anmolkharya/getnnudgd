@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, render, screen } from "@testing-library/react";
+import { renderToString } from "react-dom/server";
+import { hydrateRoot, type Root } from "react-dom/client";
 import { Reveal } from "./Reveal";
 import { Stagger } from "./Stagger";
 import { MockIntersectionObserver, installIntersectionObserver, installMatchMedia } from "./testUtils";
@@ -29,6 +31,42 @@ describe("Reveal", () => {
     expect(el).toHaveAttribute("data-reveal", "shown");
     act(() => MockIntersectionObserver.triggerAll(false));
     expect(el).toHaveAttribute("data-reveal", "shown");
+  });
+
+  it("never hides eager content", () => {
+    render(<Reveal eager>Above the fold</Reveal>);
+    expect(screen.getByText("Above the fold")).toHaveAttribute("data-reveal", "shown");
+    expect(renderToString(<Reveal eager>Above the fold</Reveal>)).toContain('data-reveal="shown"');
+  });
+
+  describe("hydration", () => {
+    let root: Root | null = null;
+    afterEach(() => {
+      act(() => root?.unmount());
+      root = null;
+      Reflect.deleteProperty(document, "timeline");
+      document.body.innerHTML = "";
+    });
+
+    function hydrateAt(currentTime: number): HTMLElement {
+      Object.defineProperty(document, "timeline", { configurable: true, value: { currentTime } });
+      const host = document.createElement("div");
+      host.innerHTML = renderToString(<Reveal>Late</Reveal>);
+      document.body.appendChild(host);
+      expect(host.firstElementChild).toHaveAttribute("data-reveal", "ssr");
+      act(() => {
+        root = hydrateRoot(host, <Reveal>Late</Reveal>);
+      });
+      return host.firstElementChild as HTMLElement;
+    }
+
+    it("stays shown when the no-JS failsafe already fired before hydration", () => {
+      expect(hydrateAt(3000)).toHaveAttribute("data-reveal", "shown");
+    });
+
+    it("arms normally when hydration beats the failsafe", () => {
+      expect(hydrateAt(500)).toHaveAttribute("data-reveal", "armed");
+    });
   });
 
   it("shows content when IntersectionObserver is unavailable", () => {
