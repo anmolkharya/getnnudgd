@@ -1,35 +1,12 @@
-export type PhotoKey =
-  | "hero-resume"
-  | "hero-find-insider"
-  | "hero-request"
-  | "hero-vouch"
-  | "hero-rewards"
-  | "hero-whatsapp"
-  | "feature-resume"
-  | "feature-insiders"
-  | "feature-requests"
-  | "feature-rewards"
-  | "feature-whatsapp"
-  | "footer-scene";
+import type {
+  FeatureImageKey,
+  HeroImageKey,
+  LogoKey,
+  MockKey,
+} from "@/src/config/landing";
 
-export type LogoKey =
-  | "logo-razorpay"
-  | "logo-phonepe"
-  | "logo-zerodha"
-  | "logo-freshworks"
-  | "logo-groww"
-  | "logo-zomato"
-  | "logo-swiggy"
-  | "logo-cred"
-  | "logo-flipkart"
-  | "logo-meesho";
-
-export type MockKey =
-  | "mock-resume"
-  | "mock-insiders"
-  | "mock-requests"
-  | "mock-rewards"
-  | "mock-whatsapp";
+// Keys come from landing.ts. A missing or extra key in these maps is a compile error.
+export type PhotoKey = HeroImageKey | FeatureImageKey | "footer-scene";
 
 export type PhotoAsset = Readonly<{
   avif: Readonly<{ 800: string; 1600: string }>;
@@ -41,8 +18,7 @@ export type PhotoAsset = Readonly<{
 }>;
 
 export type LogoAsset = Readonly<
-  | { type: "svg"; src: string; name: string }
-  | { type: "text"; name: string }
+  { type: "svg"; src: string } | { type: "text" }
 >;
 
 export type MockAsset = Readonly<{
@@ -80,7 +56,7 @@ function photo(
   };
 }
 
-export const photos: Readonly<Record<PhotoKey, PhotoAsset>> = {
+export const photos = {
   "hero-resume": photo(
     "hero-resume",
     HERO_W,
@@ -165,22 +141,22 @@ export const photos: Readonly<Record<PhotoKey, PhotoAsset>> = {
     "A standing figure silhouetted against the bright Milky Way.",
     "Photo by Erhan Dayi on Pexels",
   ),
-};
+} as const satisfies Record<PhotoKey, PhotoAsset>;
 
-export const logos: Readonly<Record<LogoKey, LogoAsset>> = {
-  "logo-razorpay": { type: "svg", src: "/landing/logos/logo-razorpay.svg", name: "Razorpay" },
-  "logo-phonepe": { type: "svg", src: "/landing/logos/logo-phonepe.svg", name: "PhonePe" },
-  "logo-zerodha": { type: "svg", src: "/landing/logos/logo-zerodha.svg", name: "Zerodha" },
-  "logo-freshworks": { type: "svg", src: "/landing/logos/logo-freshworks.svg", name: "Freshworks" },
-  "logo-groww": { type: "text", name: "Groww" },
-  "logo-zomato": { type: "text", name: "Zomato" },
-  "logo-swiggy": { type: "text", name: "Swiggy" },
-  "logo-cred": { type: "text", name: "CRED" },
-  "logo-flipkart": { type: "text", name: "Flipkart" },
-  "logo-meesho": { type: "text", name: "Meesho" },
-};
+export const logos = {
+  "logo-razorpay": { type: "svg", src: "/landing/logos/logo-razorpay.svg" },
+  "logo-phonepe": { type: "svg", src: "/landing/logos/logo-phonepe.svg" },
+  "logo-zerodha": { type: "svg", src: "/landing/logos/logo-zerodha.svg" },
+  "logo-freshworks": { type: "svg", src: "/landing/logos/logo-freshworks.svg" },
+  "logo-groww": { type: "text" },
+  "logo-zomato": { type: "text" },
+  "logo-swiggy": { type: "text" },
+  "logo-cred": { type: "text" },
+  "logo-flipkart": { type: "text" },
+  "logo-meesho": { type: "text" },
+} as const satisfies Record<LogoKey, LogoAsset>;
 
-export const mocks: Readonly<Record<MockKey, MockAsset>> = {
+export const mocks = {
   "mock-resume": {
     src: "/landing/mocks/mock-resume.svg",
     width: 360,
@@ -211,4 +187,4 @@ export const mocks: Readonly<Record<MockKey, MockAsset>> = {
     height: 220,
     alt: "A chat card with a message saying an Insider Request was accepted.",
   },
-};
+} as const satisfies Record<MockKey, MockAsset>;

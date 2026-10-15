@@ -2,44 +2,18 @@ import { describe, it, expect } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
 import { photos, logos, mocks } from "./landing-assets";
+import {
+  featureImageKeys,
+  heroImageKeys,
+  logoKeys,
+  mockKeys,
+} from "./landing";
 
 const PUBLIC_DIR = path.resolve(__dirname, "../../public");
 
-const PHOTO_KEYS = [
-  "hero-resume",
-  "hero-find-insider",
-  "hero-request",
-  "hero-vouch",
-  "hero-rewards",
-  "hero-whatsapp",
-  "feature-resume",
-  "feature-insiders",
-  "feature-requests",
-  "feature-rewards",
-  "feature-whatsapp",
-  "footer-scene",
-].sort();
-
-const LOGO_KEYS = [
-  "logo-razorpay",
-  "logo-phonepe",
-  "logo-zerodha",
-  "logo-freshworks",
-  "logo-groww",
-  "logo-zomato",
-  "logo-swiggy",
-  "logo-cred",
-  "logo-flipkart",
-  "logo-meesho",
-].sort();
-
-const MOCK_KEYS = [
-  "mock-resume",
-  "mock-insiders",
-  "mock-requests",
-  "mock-rewards",
-  "mock-whatsapp",
-].sort();
+const PHOTO_KEYS = [...heroImageKeys, ...featureImageKeys, "footer-scene"].sort();
+const LOGO_KEYS = [...logoKeys].sort();
+const MOCK_KEYS = [...mockKeys].sort();
 
 function toDisk(webPath: string): string {
   return path.join(PUBLIC_DIR, webPath.replace(/^\//, ""));
