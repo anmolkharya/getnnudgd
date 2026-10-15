@@ -10,12 +10,12 @@ Photos are from Pexels (Pexels License, free to use, credit given as a courtesy)
 | hero-find-insider | https://www.pexels.com/photo/cheerful-young-indian-coworkers-with-laptop-discussing-project-in-office-4308091/ | Ketut Subiyanto | Pexels, Pexels License | Downloaded |
 | hero-request | https://www.pexels.com/photo/man-holding-and-scrolling-a-black-smartphone-63572/ | Ahmed Aqtai | Pexels, Pexels License | Downloaded |
 | hero-vouch | https://www.pexels.com/photo/a-man-and-woman-shaking-hands-in-the-office-8101767/ | Mikhail Nilov | Pexels, Pexels License | Downloaded |
-| hero-rewards | https://www.pexels.com/photo/office-team-celebrating-in-the-office-6913228/ | Tima Miroshnichenko | Pexels, Pexels License | Downloaded |
+| hero-rewards | https://www.pexels.com/photo/happy-indian-colleagues-speaking-while-surfing-internet-on-laptop-4308105/ | Ketut Subiyanto | Pexels, Pexels License | Downloaded |
 | hero-whatsapp | https://www.pexels.com/photo/person-s-hand-showing-text-messages-on-cellphone-6669784/ | RDNE Stock project | Pexels, Pexels License | Downloaded |
 | feature-resume | https://www.pexels.com/photo/a-person-looking-at-the-stars-26151150/ | Troy Olson | Pexels, Pexels License | Downloaded |
 | feature-insiders | https://www.pexels.com/photo/person-reaching-their-arm-forward-on-the-background-of-the-beach-at-sunset-3603399/ | Bhavitya Indora | Pexels, Pexels License | Downloaded |
 | feature-requests | https://www.pexels.com/photo/a-sunset-over-a-city-with-clouds-in-the-sky-15226445/ | Umar Andrabi | Pexels, Pexels License | Downloaded |
-| feature-rewards | https://www.pexels.com/photo/christmas-gift-box-with-holiday-lights-and-decorations-29653182/ | Valeria Boltneva | Pexels, Pexels License | Downloaded |
+| feature-rewards | https://www.pexels.com/photo/serene-portrait-of-woman-with-long-hair-in-warm-light-33461159/ | Rana Rahimli | Pexels, Pexels License | Downloaded (1706x2560 source, cropped to 4:5 and output at 1600x2000) |
 | feature-whatsapp | https://www.pexels.com/photo/starry-night-sky-with-silhouette-of-person-33642993/ | Zeynep Sude Emek | Pexels, Pexels License | Downloaded |
 | footer-scene | https://www.pexels.com/photo/man-standing-under-starry-night-sky-11723084/ | Erhan Dayi | Pexels, Pexels License | Downloaded |
 

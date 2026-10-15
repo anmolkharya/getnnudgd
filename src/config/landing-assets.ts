@@ -89,8 +89,8 @@ export const photos = {
     "hero-rewards",
     HERO_W,
     HERO_H,
-    "A diverse group of young professionals celebrates a project win in a modern office.",
-    "Photo by Tima Miroshnichenko on Pexels",
+    "A smiling young woman writes in a notebook while a man in a turban works on a laptop beside her at a wooden table.",
+    "Photo by Ketut Subiyanto on Pexels",
   ),
   "hero-whatsapp": photo(
     "hero-whatsapp",
@@ -124,8 +124,8 @@ export const photos = {
     "feature-rewards",
     FEATURE_W,
     FEATURE_H,
-    "A wrapped gift box lit by warm light.",
-    "Photo by Valeria Boltneva on Pexels",
+    "A young woman in a cream top sits in warm amber light, one arm raised behind her head, looking off to the side.",
+    "Photo by Rana Rahimli on Pexels",
   ),
   "feature-whatsapp": photo(
     "feature-whatsapp",
