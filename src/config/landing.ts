@@ -65,7 +65,7 @@ export const logoKeys = [
 export type LogoKey = (typeof logoKeys)[number];
 
 // Sections whose content is placeholder data and must be confirmed before launch.
-export const PLACEHOLDER_SECTIONS = ["counter", "logos", "liveFeed", "stats"] as const;
+export const PLACEHOLDER_SECTIONS = ["counter", "logos", "bento.liveFeed", "bento.stats"] as const;
 export type PlaceholderSection = (typeof PLACEHOLDER_SECTIONS)[number];
 
 export interface LinkItem {
@@ -454,10 +454,10 @@ export const bento = {
     title: "Purpose-built for India",
     body: "Built for the way hiring already works here, in the chats and companies you know.",
     phrases: [
-      "Find an Insider at Razorpay...",
-      "Send an Insider Request to a PhonePe engineer...",
-      "Get vouched in for a Zerodha role...",
-      "Earn points when your vouch lands...",
+      "Find an Insider at a fintech in Bengaluru...",
+      "Send an Insider Request to a product team in Pune...",
+      "Get vouched in for a role you have been eyeing...",
+      "Earn points when a verified vouch lands...",
     ],
   },
   evolve: {
@@ -471,7 +471,7 @@ export const bento = {
 } as const satisfies BentoConfig;
 
 export const counter = {
-  statement: "Vouches made so far",
+  statement: "Already on the list",
   value: 25000,
   from: 24000,
   caption: "Seekers and Insiders on the waitlist so far.",

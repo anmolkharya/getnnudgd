@@ -31,6 +31,19 @@ function collectLinks(value: unknown, out: { href: string; target: unknown }[] =
   return out;
 }
 
+// Walks the module and returns the dotted path of every object flagged placeholder: true.
+function collectPlaceholderPaths(value: object, prefix = "", out: string[] = []): string[] {
+  for (const [key, child] of Object.entries(value)) {
+    if (child === null || typeof child !== "object" || Array.isArray(child)) continue;
+    const childPath = prefix ? `${prefix}.${key}` : key;
+    if ((child as Record<string, unknown>).placeholder === true) {
+      out.push(childPath);
+    }
+    collectPlaceholderPaths(child, childPath, out);
+  }
+  return out;
+}
+
 function expectedTarget(href: string): string | undefined {
   if (href.startsWith("#")) return "anchor";
   if (href.startsWith("/")) return "route";
@@ -168,7 +181,9 @@ describe("landing content config", () => {
     const links = collectLinks(landing);
     expect(links.length).toBeGreaterThan(0);
     for (const link of links) {
-      expect(link.target).toBe(expectedTarget(link.href));
+      const target = expectedTarget(link.href);
+      expect(target, `unknown href prefix: ${link.href}`).toBeDefined();
+      expect(link.target).toBe(target);
     }
   });
 
@@ -209,9 +224,8 @@ describe("landing content config", () => {
     expect(landing.logos.placeholder).toBe(true);
     expect(landing.bento.liveFeed.placeholder).toBe(true);
     expect(landing.bento.stats.placeholder).toBe(true);
-    expect(sorted(landing.PLACEHOLDER_SECTIONS)).toEqual(
-      sorted(["counter", "logos", "liveFeed", "stats"]),
-    );
+    const flagged = collectPlaceholderPaths(landing);
+    expect(sorted(flagged)).toEqual(sorted([...landing.PLACEHOLDER_SECTIONS]));
   });
 
   it("keeps the counter growing from a lower starting value", () => {
