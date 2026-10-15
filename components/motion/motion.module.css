@@ -1,0 +1,269 @@
+/*
+ * Keyframes and state styles for components/motion primitives.
+ * Colocated CSS module (globals.css is owned by T-100).
+ */
+
+/* ---------- Reveal ---------- */
+
+.reveal {
+  --reveal-y: 24px;
+  --reveal-blur: 0px;
+  transition-property: opacity, transform, filter;
+  transition-duration: 700ms;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/*
+ * Server-rendered markup is hidden ONLY when the browser runs scripts, and even
+ * then a fail-safe animation shows it after 2.5s in case hydration never
+ * happens. No-JS visitors and crawlers that do not run JS see the content.
+ */
+@media (scripting: enabled) {
+  .reveal[data-reveal="ssr"] {
+    opacity: 0;
+    transform: translate3d(0, var(--reveal-y), 0);
+    filter: blur(var(--reveal-blur));
+    animation: reveal-failsafe 600ms ease-out 2500ms forwards;
+  }
+}
+
+.reveal[data-reveal="armed"] {
+  opacity: 0;
+  transform: translate3d(0, var(--reveal-y), 0);
+  filter: blur(var(--reveal-blur));
+}
+
+.reveal[data-reveal="shown"] {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+@keyframes reveal-failsafe {
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+/* ---------- Marquee ---------- */
+
+.marquee {
+  --marquee-duration: 30s;
+  --marquee-distance: -50%;
+  --marquee-gap: 32px;
+  display: flex;
+  overflow: hidden;
+}
+
+.marqueeX {
+  flex-direction: row;
+}
+
+.marqueeY {
+  flex-direction: column;
+}
+
+.marqueeTrack {
+  display: flex;
+  flex-shrink: 0;
+  animation-duration: var(--marquee-duration);
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-play-state: paused;
+  will-change: transform;
+}
+
+.marqueeX .marqueeTrack {
+  flex-direction: row;
+  animation-name: marquee-x;
+}
+
+.marqueeY .marqueeTrack {
+  flex-direction: column;
+  animation-name: marquee-y;
+}
+
+.marqueeGroup {
+  display: flex;
+  flex-shrink: 0;
+  gap: var(--marquee-gap);
+}
+
+.marqueeX .marqueeGroup {
+  flex-direction: row;
+  align-items: center;
+  padding-right: var(--marquee-gap);
+}
+
+.marqueeY .marqueeGroup {
+  flex-direction: column;
+  padding-bottom: var(--marquee-gap);
+}
+
+.marquee[data-direction="reverse"] .marqueeTrack {
+  animation-direction: reverse;
+}
+
+.marquee[data-running="true"] .marqueeTrack {
+  animation-play-state: running;
+}
+
+.marquee[data-pause-on-hover="true"]:hover .marqueeTrack,
+.marquee:focus-within .marqueeTrack {
+  animation-play-state: paused;
+}
+
+/* Reduced motion: no animation; horizontal strips become scrollable instead. */
+.marquee[data-reduced="true"] .marqueeTrack {
+  animation: none;
+}
+
+.marquee[data-reduced="true"].marqueeX {
+  overflow-x: auto;
+}
+
+@keyframes marquee-x {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(var(--marquee-distance), 0, 0);
+  }
+}
+
+@keyframes marquee-y {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(0, var(--marquee-distance), 0);
+  }
+}
+
+.marquee[data-reduced="true"].marqueeX:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+}
+
+/* ---------- Autoplay progress ---------- */
+
+.autoplayTrack {
+  display: block;
+  overflow: hidden;
+}
+
+.autoplayFill {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+.autoplayFill[data-state="done"] {
+  transform: scaleX(1);
+}
+
+.autoplayFill[data-state="active"] {
+  animation-name: autoplay-fill;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+@keyframes autoplay-fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* ---------- Odometer ---------- */
+
+.odometerDigits {
+  display: inline-flex;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.odometerWindow {
+  display: inline-block;
+  height: 1em;
+  overflow: hidden;
+}
+
+.odometerColumn {
+  display: flex;
+  flex-direction: column;
+  will-change: transform;
+}
+
+.odometerColumn > span {
+  display: block;
+  height: 1em;
+}
+
+/* ---------- TypeLoop ---------- */
+
+.typeStack {
+  display: inline-grid;
+  vertical-align: bottom;
+}
+
+.typeStack > * {
+  grid-area: 1 / 1;
+}
+
+.typeGhost {
+  visibility: hidden;
+  /* leave room for the caret */
+  padding-right: 4px;
+}
+
+.typeLive {
+  white-space: pre-wrap;
+}
+
+.caret {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  background: currentColor;
+  animation: caret-blink 1s steps(1) infinite;
+}
+
+@keyframes caret-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal[data-reveal] {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    transition: none;
+    animation: none;
+  }
+
+  .marqueeTrack {
+    animation: none;
+  }
+
+  .caret {
+    animation: none;
+  }
+
+  .autoplayFill[data-state="active"] {
+    animation: none;
+    transform: scaleX(1);
+  }
+}
