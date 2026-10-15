@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Inter } from "next/font/google";
+import { Plus_Jakarta_Sans, Inter, IBM_Plex_Serif, IBM_Plex_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import { brand } from "@/src/config/brand";
 import "./globals.css";
@@ -14,6 +14,23 @@ const jakarta = Plus_Jakarta_Sans({
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
+  display: "swap",
+});
+
+// Landing v2 accent fonts: serif italic for accent heading lines and the
+// giant counter; mono for uppercase micro-labels.
+const plexSerif = IBM_Plex_Serif({
+  subsets: ["latin"],
+  variable: "--font-plex-serif",
+  weight: ["500"],
+  style: ["italic"],
+  display: "swap",
+});
+
+const plexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  variable: "--font-plex-mono",
+  weight: ["400", "500"],
   display: "swap",
 });
 
@@ -39,7 +56,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${jakarta.variable} ${inter.variable}`}
+      className={`${jakarta.variable} ${inter.variable} ${plexSerif.variable} ${plexMono.variable}`}
     >
       <body>
         {children}
