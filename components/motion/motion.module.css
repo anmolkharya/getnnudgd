@@ -194,6 +194,9 @@
   display: inline-block;
   height: 1em;
   overflow: hidden;
+  /* Room for italic overhang on the last digit, offset so layout width is unchanged. */
+  padding-inline-end: 0.1em;
+  margin-inline-end: -0.1em;
 }
 
 .odometerColumn {
