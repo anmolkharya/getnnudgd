@@ -65,7 +65,13 @@ export const logoKeys = [
 export type LogoKey = (typeof logoKeys)[number];
 
 // Sections whose content is placeholder data and must be confirmed before launch.
-export const PLACEHOLDER_SECTIONS = ["counter", "logos", "bento.liveFeed", "bento.stats"] as const;
+export const PLACEHOLDER_SECTIONS = [
+  "counter",
+  "logos",
+  "bento.liveFeed",
+  "bento.stats",
+  "network",
+] as const;
 export type PlaceholderSection = (typeof PLACEHOLDER_SECTIONS)[number];
 
 export interface LinkItem {
@@ -235,6 +241,43 @@ export interface FooterConfig {
   readonly cta: LinkItem;
   readonly columns: readonly FooterColumn[];
   readonly wordmark: string;
+}
+
+export const networkFields = ["Product", "Engineering", "Design", "Data", "Marketing"] as const;
+export type NetworkField = (typeof networkFields)[number];
+
+export interface NetworkCompany {
+  readonly id: string;
+  readonly name: string;
+  /** The company at the centre of the map. Exactly one. */
+  readonly hub?: boolean;
+}
+
+export interface NetworkPerson {
+  readonly id: string;
+  /** Sample first name and initial. These are illustrative, not real Insiders. */
+  readonly name: string;
+  readonly role: string;
+  readonly years: number;
+  readonly field: NetworkField;
+  readonly companyId: string;
+  /** Sample role-match percentage, 0 to 100. */
+  readonly match: number;
+}
+
+export interface NetworkConfig {
+  readonly headingSans: string;
+  readonly headingSerif: string;
+  readonly sub: string;
+  readonly placeholder: boolean;
+  readonly filterHeading: string;
+  readonly allLabel: string;
+  readonly fields: readonly NetworkField[];
+  readonly mapLabel: string;
+  readonly matchLabel: string;
+  readonly yearsLabel: string;
+  readonly companies: readonly NetworkCompany[];
+  readonly people: readonly NetworkPerson[];
 }
 
 // ---------------------------------------------------------------------------
@@ -469,6 +512,42 @@ export const bento = {
     body: "Your resume goes only to the Insider you ask, and through them to that company's hiring process.",
   },
 } as const satisfies BentoConfig;
+
+export const network = {
+  headingSans: "Explore a universe of",
+  headingSerif: "opportunities.",
+  sub: "Real people. Real insights. Real opportunities.",
+  placeholder: true, // placeholder: sample people and companies, not live Insiders
+  filterHeading: "Explore by field",
+  allLabel: "All companies",
+  fields: networkFields,
+  mapLabel: "An illustrated map of Insiders and the companies they work at.",
+  matchLabel: "role match",
+  yearsLabel: "years",
+  companies: [
+    { id: "product-co", name: "A product company", hub: true },
+    { id: "fintech", name: "A fintech" },
+    { id: "quick-commerce", name: "A quick-commerce app" },
+    { id: "payments", name: "A payments company" },
+    { id: "edtech", name: "An edtech" },
+    { id: "saas", name: "A SaaS company" },
+    { id: "d2c", name: "A D2C brand" },
+  ],
+  people: [
+    { id: "priya", name: "Priya S.", role: "Senior PM", years: 5, field: "Product", companyId: "product-co", match: 91 },
+    { id: "arjun", name: "Arjun M.", role: "SDE-2", years: 4, field: "Engineering", companyId: "product-co", match: 86 },
+    { id: "neha", name: "Neha K.", role: "Product Designer", years: 6, field: "Design", companyId: "fintech", match: 88 },
+    { id: "rohan", name: "Rohan P.", role: "Backend Engineer", years: 3, field: "Engineering", companyId: "fintech", match: 84 },
+    { id: "ananya", name: "Ananya R.", role: "Data Analyst", years: 4, field: "Data", companyId: "quick-commerce", match: 90 },
+    { id: "vikram", name: "Vikram T.", role: "Growth Lead", years: 7, field: "Marketing", companyId: "quick-commerce", match: 79 },
+    { id: "isha", name: "Isha G.", role: "Product Manager", years: 5, field: "Product", companyId: "payments", match: 87 },
+    { id: "karan", name: "Karan D.", role: "Staff Engineer", years: 9, field: "Engineering", companyId: "payments", match: 82 },
+    { id: "meera", name: "Meera N.", role: "UX Researcher", years: 4, field: "Design", companyId: "edtech", match: 85 },
+    { id: "sahil", name: "Sahil B.", role: "Data Scientist", years: 6, field: "Data", companyId: "saas", match: 89 },
+    { id: "divya", name: "Divya L.", role: "Brand Manager", years: 5, field: "Marketing", companyId: "d2c", match: 80 },
+    { id: "aman", name: "Aman J.", role: "Associate PM", years: 3, field: "Product", companyId: "d2c", match: 83 },
+  ],
+} as const satisfies NetworkConfig;
 
 export const counter = {
   statement: "Already on the list",

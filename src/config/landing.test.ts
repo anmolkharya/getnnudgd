@@ -246,3 +246,32 @@ describe("landing content config", () => {
     expect(/getnudgd/i.test(source)).toBe(false);
   });
 });
+
+describe("network map content", () => {
+  it("has exactly one hub company and unique ids", () => {
+    const hubs = landing.network.companies.filter((c) => "hub" in c && c.hub);
+    expect(hubs).toHaveLength(1);
+    const ids = [...landing.network.companies.map((c) => c.id), ...landing.network.people.map((p) => p.id)];
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it("points every person at a known company and field, with a valid match", () => {
+    const companyIds = new Set(landing.network.companies.map((c) => c.id));
+    for (const person of landing.network.people) {
+      expect(companyIds.has(person.companyId)).toBe(true);
+      expect(landing.network.fields).toContain(person.field);
+      expect(person.match).toBeGreaterThanOrEqual(0);
+      expect(person.match).toBeLessThanOrEqual(100);
+    }
+  });
+
+  it("gives every field at least one person so no filter is empty", () => {
+    for (const field of landing.network.fields) {
+      expect(landing.network.people.some((p) => p.field === field)).toBe(true);
+    }
+  });
+
+  it("is flagged as placeholder sample data", () => {
+    expect(landing.network.placeholder).toBe(true);
+  });
+});

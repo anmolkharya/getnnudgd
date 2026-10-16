@@ -2,6 +2,7 @@ import { brand } from "@/src/config/brand";
 import { LandingNav } from "@/components/landing/Nav";
 import { LandingHero } from "@/components/landing/Hero";
 import { LandingLogos } from "@/components/landing/Logos";
+import { LandingNetwork } from "@/components/landing/Network";
 import { LandingFeatures } from "@/components/landing/Features";
 import { LandingBento } from "@/components/landing/Bento";
 import { LandingCounter } from "@/components/landing/Counter";
@@ -22,6 +23,7 @@ export default function LandingPage() {
         <main>
           <LandingHero />
           <LandingLogos />
+          <LandingNetwork />
           <LandingFeatures />
           <LandingBento />
           <LandingCounter />
