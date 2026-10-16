@@ -1,16 +1,18 @@
-/* Giant cropped wordmark: sits below the footer's bottom edge and fades out. */
+/* Giant wordmark: sized from the page width so the whole word always fits,
+   never cropped. "GetNudgd" is about 5.2em wide in Plus Jakarta Sans semibold,
+   so dividing the usable width by 5.3 leaves a small margin. The fade is in
+   the fill colour, so every letter stays visible. */
 .wordmark {
-  font-size: 22vw;
-  line-height: 1;
-  transform: translateY(25%);
-  -webkit-mask-image: linear-gradient(to bottom, black 30%, transparent);
-  mask-image: linear-gradient(to bottom, black 30%, transparent);
-}
-
-@media (min-width: 1024px) {
-  .wordmark {
-    font-size: 26vw;
-  }
+  /* Positioned so it paints above the absolutely placed photo and overlays. */
+  position: relative;
+  font-size: calc((min(100vw, var(--lv-container)) - 2 * var(--lv-gutter)) / 5.3);
+  line-height: 1.05;
+  /* Room below the baseline so the tail of the g is not clipped by the footer. */
+  padding-bottom: 0.12em;
+  background: linear-gradient(to bottom, rgb(255 255 255 / 0.95), rgb(255 255 255 / 0.4));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 /* Photo layer is 120% tall so the parallax never reveals an edge. */
