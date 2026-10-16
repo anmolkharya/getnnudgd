@@ -1,0 +1,1 @@
+export { LandingBento } from "./LandingBento";
