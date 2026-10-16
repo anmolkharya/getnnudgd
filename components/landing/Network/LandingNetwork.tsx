@@ -104,8 +104,8 @@ export function LandingNetwork() {
             const nearestX = clamp(cx, o.left, o.left + CARD_WIDTH);
             const nearestY = clamp(cy, o.top, o.top + cardHeight);
             if (Math.hypot(cx - nearestX, cy - nearestY) < other.size * Math.min(w, h) + 4) {
-              // Covering the hub or a logo costs more than covering a face.
-              count += other.kind === "hub" ? 6 : other.kind === "company" ? 3 : 1;
+              // Covering you or a logo costs more than covering a face.
+              count += other.kind === "seeker" ? 6 : other.kind === "company" ? 3 : 1;
             }
           }
           return count;
@@ -141,6 +141,7 @@ export function LandingNetwork() {
         palette,
         companyArt: artRef.current,
         looks: LOOKS,
+        seekerLabel: network.seekerLabel,
       });
       positionCard();
     };
@@ -205,7 +206,8 @@ export function LandingNetwork() {
       const dt = Math.min((now - last) / 1000, 0.05);
       last = now;
       timeRef.current += dt;
-      step(graph, dt, timeRef.current, pointerRef.current);
+      const { w, h } = sizeRef.current;
+      step(graph, dt, timeRef.current, pointerRef.current, w > 0 && h > 0 ? w / h : undefined);
       paintRef.current?.();
       raf = requestAnimationFrame(frame);
     };

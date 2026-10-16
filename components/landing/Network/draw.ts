@@ -1,5 +1,5 @@
 import type { AvatarLook, NetworkField } from "@/src/config/landing";
-import { isNodeActive, type NetGraph, type NetNode } from "./engine";
+import { isNodeActive, pathEdges, type NetGraph, type NetNode } from "./engine";
 
 /** Colours come from the design tokens, read once from the stage element. */
 export interface Palette {
@@ -28,6 +28,8 @@ export interface DrawOptions {
   companyArt: ReadonlyMap<string, CompanyArt>;
   /** Face look per person, indexed by `node.personIndex`. */
   looks: readonly AvatarLook[];
+  /** Label under the centre node. */
+  seekerLabel: string;
 }
 
 export function readPalette(el: Element): Palette {
@@ -209,38 +211,89 @@ function drawCompanyMark(
 
 function drawCompany(
   ctx: CanvasRenderingContext2D,
-  node: NetNode,
   art: CompanyArt | undefined,
   x: number,
   y: number,
   r: number,
   palette: Palette,
-  time: number,
   dimmed: boolean,
 ) {
-  const hub = node.kind === "hub";
   ctx.save();
   ctx.globalAlpha = dimmed ? 0.28 : 1;
-  glow(ctx, x, y, r * (hub ? 3.2 : 2.1), hub ? palette.accent : palette.indigo, hub ? 0.5 : 0.22);
+  glow(ctx, x, y, r * 2.1, palette.indigo, 0.22);
   ctx.beginPath();
   ctx.arc(x, y, r, 0, Math.PI * 2);
   ctx.fillStyle = "rgba(255,255,255,0.97)";
   ctx.fill();
   drawCompanyMark(ctx, art, x, y, r, palette);
-  if (hub) {
-    ctx.strokeStyle = palette.indigo;
-    ctx.lineWidth = 1.5;
-    ctx.setLineDash([4, 7]);
-    ctx.lineDashOffset = -time * 14;
+  ctx.restore();
+}
+
+/** The centre of the map: you, the Seeker, with a small label underneath. */
+function drawSeeker(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  r: number,
+  palette: Palette,
+  time: number,
+  label: string,
+) {
+  ctx.save();
+  glow(ctx, x, y, r * 3.2, palette.accent, 0.5);
+
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.closePath();
+  const disc = ctx.createLinearGradient(x, y - r, x, y + r);
+  disc.addColorStop(0, palette.indigo);
+  disc.addColorStop(1, palette.accent);
+  ctx.fillStyle = disc;
+  ctx.fill();
+
+  // A plain person glyph, so it reads as "you" rather than as any one profile.
+  ctx.save();
+  ctx.clip();
+  ctx.fillStyle = "rgba(255,255,255,0.95)";
+  ctx.beginPath();
+  ctx.arc(x, y - r * 0.2, r * 0.28, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(x, y + r * 0.78, r * 0.62, r * 0.5, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+
+  ctx.strokeStyle = palette.indigo;
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([4, 7]);
+  ctx.lineDashOffset = -time * 14;
+  ctx.beginPath();
+  ctx.arc(x, y, r * 1.3, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  if (label) {
+    const size = Math.max(10, r * 0.34);
+    ctx.font = `600 ${size}px ${palette.font}`;
+    const textWidth = ctx.measureText(label).width;
+    const padX = size * 0.7;
+    const pillW = textWidth + padX * 2;
+    const pillH = size * 1.7;
+    const pillY = y + r * 1.62;
+    ctx.fillStyle = "rgba(255,255,255,0.96)";
     ctx.beginPath();
-    ctx.arc(x, y, r * 1.3, 0, Math.PI * 2);
-    ctx.stroke();
+    ctx.roundRect(x - pillW / 2, pillY - pillH / 2, pillW, pillH, pillH / 2);
+    ctx.fill();
+    ctx.fillStyle = palette.ink;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(label, x, pillY + 0.5);
   }
   ctx.restore();
 }
 
 export function drawScene(ctx: CanvasRenderingContext2D, graph: NetGraph, options: DrawOptions): void {
-  const { width, height, dpr, time, field, activeId, palette, companyArt, looks } = options;
+  const { width, height, dpr, time, field, activeId, palette, companyArt, looks, seekerLabel } = options;
   const unit = Math.min(width, height);
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, width, height);
@@ -248,20 +301,23 @@ export function drawScene(ctx: CanvasRenderingContext2D, graph: NetGraph, option
   const px = (node: NetNode) => node.x * width;
   const py = (node: NetNode) => node.y * height;
 
-  // Edges first, so nodes sit on top.
-  for (const edge of graph.edges) {
+  // Edges first, so nodes sit on top. The chosen person's path is lit:
+  // You to their company, then the company to them.
+  const lit = pathEdges(graph, activeId);
+  graph.edges.forEach((edge, index) => {
     const a = graph.nodes[edge.a];
     const b = graph.nodes[edge.b];
-    if (!a || !b) continue;
+    if (!a || !b) return;
     const live = isNodeActive(graph, a, field) && isNodeActive(graph, b, field);
-    ctx.strokeStyle = "rgba(255,255,255,1)";
-    ctx.globalAlpha = live ? (edge.faint ? 0.08 : 0.18) : 0.03;
-    ctx.lineWidth = 1;
+    const onPath = lit.has(index) && live;
+    ctx.strokeStyle = onPath ? palette.indigo : "rgba(255,255,255,1)";
+    ctx.globalAlpha = onPath ? 0.85 : live ? 0.18 : 0.03;
+    ctx.lineWidth = onPath ? 2 : 1;
     ctx.beginPath();
     ctx.moveTo(px(a), py(a));
     ctx.lineTo(px(b), py(b));
     ctx.stroke();
-  }
+  });
   ctx.globalAlpha = 1;
 
   // Sparks twinkle in the background.
@@ -293,18 +349,20 @@ export function drawScene(ctx: CanvasRenderingContext2D, graph: NetGraph, option
 
   // Companies, then people on top.
   for (const node of graph.nodes) {
-    if (node.kind !== "hub" && node.kind !== "company") continue;
+    if (node.kind !== "company") continue;
     drawCompany(
       ctx,
-      node,
       companyArt.get(node.companyId ?? ""),
       px(node),
       py(node),
       node.size * unit,
       palette,
-      time,
       !isNodeActive(graph, node, field),
     );
+  }
+  for (const node of graph.nodes) {
+    if (node.kind !== "seeker") continue;
+    drawSeeker(ctx, px(node), py(node), node.size * unit, palette, time, seekerLabel);
   }
   for (const node of graph.nodes) {
     if (node.kind !== "person") continue;

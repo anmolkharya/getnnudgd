@@ -251,8 +251,6 @@ export interface NetworkCompany {
   readonly name: string;
   /** Which logo from the asset manifest the node shows. */
   readonly logoKey: LogoKey;
-  /** The company at the centre of the map. Exactly one. */
-  readonly hub?: boolean;
 }
 
 export type AvatarHair = "short" | "long" | "bun" | "curly";
@@ -286,6 +284,8 @@ export interface NetworkConfig {
   readonly allLabel: string;
   readonly fields: readonly NetworkField[];
   readonly mapLabel: string;
+  /** Label under the centre node, which stands for the person looking. */
+  readonly seekerLabel: string;
   readonly disclaimer: string;
   readonly matchLabel: string;
   readonly yearsLabel: string;
@@ -534,18 +534,21 @@ export const network = {
   filterHeading: "Explore by field",
   allLabel: "All companies",
   fields: networkFields,
-  mapLabel: "An illustrated map of sample Insiders and the companies they could work at.",
+  mapLabel:
+    "An illustrated map with you in the centre, companies around you, and the sample Insiders who work at each.",
+  seekerLabel: "You",
   disclaimer: `Sample profiles shown for illustration. Logos are trademarks of their respective owners. ${brand.name} is not affiliated with or endorsed by these companies.`,
   matchLabel: "role match",
   yearsLabel: "years",
+  // Alternates companies that have a logo file with ones shown as a wordmark.
   companies: [
-    { id: "razorpay", name: "Razorpay", logoKey: "logo-razorpay", hub: true },
-    { id: "phonepe", name: "PhonePe", logoKey: "logo-phonepe" },
-    { id: "zerodha", name: "Zerodha", logoKey: "logo-zerodha" },
-    { id: "freshworks", name: "Freshworks", logoKey: "logo-freshworks" },
-    { id: "groww", name: "Groww", logoKey: "logo-groww" },
-    { id: "zomato", name: "Zomato", logoKey: "logo-zomato" },
+    { id: "razorpay", name: "Razorpay", logoKey: "logo-razorpay" },
     { id: "swiggy", name: "Swiggy", logoKey: "logo-swiggy" },
+    { id: "phonepe", name: "PhonePe", logoKey: "logo-phonepe" },
+    { id: "zomato", name: "Zomato", logoKey: "logo-zomato" },
+    { id: "zerodha", name: "Zerodha", logoKey: "logo-zerodha" },
+    { id: "groww", name: "Groww", logoKey: "logo-groww" },
+    { id: "freshworks", name: "Freshworks", logoKey: "logo-freshworks" },
   ],
   people: [
     { id: "priya", name: "Priya S.", role: "Senior PM", years: 5, field: "Product", companyId: "razorpay", match: 91, look: { skin: 1, hair: "long" } },

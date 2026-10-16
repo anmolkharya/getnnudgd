@@ -248,9 +248,10 @@ describe("landing content config", () => {
 });
 
 describe("network map content", () => {
-  it("has exactly one hub company and unique ids", () => {
-    const hubs = landing.network.companies.filter((c) => "hub" in c && c.hub);
-    expect(hubs).toHaveLength(1);
+  it("puts no company at the centre and keeps ids unique", () => {
+    // The centre of the map is the person looking, so no company may claim it.
+    for (const company of landing.network.companies) expect(company).not.toHaveProperty("hub");
+    expect(landing.network.seekerLabel.length).toBeGreaterThan(0);
     const ids = [...landing.network.companies.map((c) => c.id), ...landing.network.people.map((p) => p.id)];
     expect(new Set(ids).size).toBe(ids.length);
   });

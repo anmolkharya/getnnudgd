@@ -3,9 +3,13 @@ import type { NetworkField } from "@/src/config/landing";
 /**
  * Pure layout and motion for the network map. No DOM and no canvas here, so it
  * can be unit tested. Coordinates are normalised to the 0..1 box of the stage.
+ *
+ * The map reads as: You (the Seeker) in the centre, companies on a ring around
+ * you, and the Insiders who work at each company next to it. No company and no
+ * platform sits in the middle.
  */
 
-export type NodeKind = "hub" | "company" | "person" | "spark";
+export type NodeKind = "seeker" | "company" | "person" | "spark";
 
 export interface NetNode {
   id: string;
@@ -27,13 +31,11 @@ export interface NetNode {
 export interface NetEdge {
   a: number;
   b: number;
-  /** Faint background links between neighbouring companies. */
-  faint: boolean;
 }
 
 export interface Pulse {
   edge: number;
-  /** 0..1 progress along the edge. */
+  /** 0..1 progress along the edge, from `a` to `b`. */
   t: number;
   /** Progress per second. */
   speed: number;
@@ -49,7 +51,7 @@ export interface NetGraph {
 }
 
 export interface GraphInput {
-  companies: readonly { id: string; hub?: boolean }[];
+  companies: readonly { id: string }[];
   people: readonly { id: string; field: NetworkField; companyId: string }[];
 }
 
@@ -61,6 +63,8 @@ export interface Pointer {
 const MARGIN = 0.1;
 const SPARK_COUNT = 22;
 const PULSE_COUNT = 12;
+/** Width divided by height of a typical stage, used where the real one is unknown. */
+const DEFAULT_ASPECT = 1.2;
 
 /** Small seeded PRNG so the layout is the same on every render. */
 export function mulberry32(seed: number): () => number {
@@ -78,44 +82,62 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
 
-/**
- * Push overlapping nodes apart so logos and faces never sit on top of each
- * other. The hub stays put and companies move less than people.
- */
-function relax(nodes: NetNode[]): void {
-  const aspect = 1.1;
-  const weight = (node: NetNode) => (node.kind === "hub" ? 0 : node.kind === "company" ? 0.35 : 1);
-  const movable = nodes.filter((n) => n.kind !== "spark");
-  for (let pass = 0; pass < 60; pass += 1) {
-    let moved = false;
-    for (let i = 0; i < movable.length; i += 1) {
-      for (let j = i + 1; j < movable.length; j += 1) {
-        const a = movable[i] as NetNode;
-        const b = movable[j] as NetNode;
-        const dx = (b.ax - a.ax) * aspect;
-        const dy = b.ay - a.ay;
-        const dist = Math.hypot(dx, dy) || 0.0001;
-        const min = (a.size + b.size) * 1.3 + 0.02;
-        if (dist >= min) continue;
-        const wa = weight(a);
-        const wb = weight(b);
-        if (wa + wb === 0) continue;
-        const push = (min - dist) / dist;
-        const share = (w: number) => w / (wa + wb);
-        a.ax -= (dx / aspect) * push * share(wa);
-        a.ay -= dy * push * share(wa);
-        b.ax += (dx / aspect) * push * share(wb);
-        b.ay += dy * push * share(wb);
-        moved = true;
+/** How far a node gives way when two overlap. The seeker never moves. */
+function giveWay(node: NetNode): number {
+  return node.kind === "seeker" ? 0 : node.kind === "company" ? 0.35 : 1;
+}
+
+/** Push apart every pair of non-spark nodes that is closer than their radii allow. */
+function separate(nodes: NetNode[], useAnchor: boolean, aspect: number, gap: number, ease: number): boolean {
+  const solid = nodes.filter((n) => n.kind !== "spark");
+  let moved = false;
+  for (let i = 0; i < solid.length; i += 1) {
+    for (let j = i + 1; j < solid.length; j += 1) {
+      const a = solid[i] as NetNode;
+      const b = solid[j] as NetNode;
+      const ax = useAnchor ? a.ax : a.x;
+      const ay = useAnchor ? a.ay : a.y;
+      const bx = useAnchor ? b.ax : b.x;
+      const by = useAnchor ? b.ay : b.y;
+      const dx = (bx - ax) * aspect;
+      const dy = by - ay;
+      const dist = Math.hypot(dx, dy) || 0.0001;
+      const min = (a.size + b.size) * 1.3 + gap;
+      if (dist >= min) continue;
+      const wa = giveWay(a);
+      const wb = giveWay(b);
+      if (wa + wb === 0) continue;
+      const push = ((min - dist) / dist) * ease;
+      const shareA = wa / (wa + wb);
+      const shareB = wb / (wa + wb);
+      if (useAnchor) {
+        a.ax -= (dx / aspect) * push * shareA;
+        a.ay -= dy * push * shareA;
+        b.ax += (dx / aspect) * push * shareB;
+        b.ay += dy * push * shareB;
+      } else {
+        a.x -= (dx / aspect) * push * shareA;
+        a.y -= dy * push * shareA;
+        b.x += (dx / aspect) * push * shareB;
+        b.y += dy * push * shareB;
       }
+      moved = true;
     }
-    for (const node of movable) {
+  }
+  return moved;
+}
+
+function relaxAnchors(nodes: NetNode[]): void {
+  for (let pass = 0; pass < 60; pass += 1) {
+    const moved = separate(nodes, true, DEFAULT_ASPECT, 0.02, 1);
+    for (const node of nodes) {
+      if (node.kind === "spark") continue;
       node.ax = clamp(node.ax, MARGIN, 1 - MARGIN);
       node.ay = clamp(node.ay, MARGIN, 1 - MARGIN);
     }
     if (!moved) break;
   }
-  for (const node of movable) {
+  for (const node of nodes) {
     node.x = node.ax;
     node.y = node.ay;
   }
@@ -128,94 +150,67 @@ export function buildGraph(input: GraphInput, seed = 7): NetGraph {
   const companyIndex = new Map<string, number>();
   const companyFields = new Map<string, Set<NetworkField>>();
 
-  const hub = input.companies.find((c) => c.hub) ?? input.companies[0];
-  const others = input.companies.filter((c) => c !== hub);
-
   const addNode = (node: Omit<NetNode, "x" | "y">): number => {
     nodes.push({ ...node, x: node.ax, y: node.ay });
     return nodes.length - 1;
   };
 
-  if (hub) {
-    companyIndex.set(
-      hub.id,
-      addNode({ id: hub.id, kind: "hub", ax: 0.5, ay: 0.5, size: 0.085, phase: rand() * 6.28, companyId: hub.id }),
-    );
-  }
+  // You, in the middle.
+  const seekerIndex = addNode({ id: "seeker", kind: "seeker", ax: 0.5, ay: 0.5, size: 0.08, phase: rand() * 6.28 });
 
+  // Companies on a ring around you, each one reachable from you.
   const companyAngle = new Map<string, number>();
-  const ringStart = -Math.PI / 2 + 0.35;
-  others.forEach((company, i) => {
-    const angle = ringStart + (i / Math.max(others.length, 1)) * Math.PI * 2;
+  const count = Math.max(input.companies.length, 1);
+  input.companies.forEach((company, i) => {
+    const angle = -Math.PI / 2 + (i / count) * Math.PI * 2;
     companyAngle.set(company.id, angle);
     const index = addNode({
       id: company.id,
       kind: "company",
-      ax: clamp(0.5 + Math.cos(angle) * 0.36, MARGIN, 1 - MARGIN),
-      ay: clamp(0.5 + Math.sin(angle) * 0.34, MARGIN, 1 - MARGIN),
+      ax: clamp(0.5 + Math.cos(angle) * 0.3, MARGIN, 1 - MARGIN),
+      ay: clamp(0.5 + Math.sin(angle) * 0.28, MARGIN, 1 - MARGIN),
       size: 0.06,
       phase: rand() * 6.28,
       companyId: company.id,
     });
     companyIndex.set(company.id, index);
-  });
-  if (hub) companyAngle.set(hub.id, -Math.PI / 2);
-
-  const hubIndex = hub ? companyIndex.get(hub.id) : undefined;
-  if (hubIndex !== undefined) {
-    others.forEach((company) => {
-      const index = companyIndex.get(company.id);
-      if (index !== undefined) edges.push({ a: hubIndex, b: index, faint: false });
-    });
-  }
-  // Faint ring between neighbouring companies.
-  others.forEach((company, i) => {
-    const next = others[(i + 1) % others.length];
-    const a = companyIndex.get(company.id);
-    const b = next ? companyIndex.get(next.id) : undefined;
-    if (a !== undefined && b !== undefined && a !== b) edges.push({ a, b, faint: true });
+    edges.push({ a: seekerIndex, b: index });
   });
 
-  // People cluster around their company.
+  // Insiders sit just outside the company they work at.
   const perCompany = new Map<string, number>();
   input.people.forEach((person) => {
     perCompany.set(person.companyId, (perCompany.get(person.companyId) ?? 0) + 1);
   });
   const placed = new Map<string, number>();
-  const personNodeIndexes: number[] = [];
   input.people.forEach((person, personIndex) => {
-    const companyNode = nodes[companyIndex.get(person.companyId) ?? 0];
-    if (!companyNode) return;
-    const count = perCompany.get(person.companyId) ?? 1;
+    const companyNodeIndex = companyIndex.get(person.companyId);
+    const companyNode = companyNodeIndex === undefined ? undefined : nodes[companyNodeIndex];
+    if (!companyNode || companyNodeIndex === undefined) return;
+    const total = perCompany.get(person.companyId) ?? 1;
     const j = placed.get(person.companyId) ?? 0;
     placed.set(person.companyId, j + 1);
-    const base = companyAngle.get(person.companyId) ?? 0;
-    const spread = (j - (count - 1) / 2) * 1.05;
-    const angle = (companyNode.kind === "hub" ? Math.PI * 0.5 : base) + spread + (rand() - 0.5) * 0.25;
-    const radius = (companyNode.kind === "hub" ? 0.17 : 0.14) + rand() * 0.04;
+    const outward = companyAngle.get(person.companyId) ?? 0;
+    const angle = outward + (j - (total - 1) / 2) * 0.9 + (rand() - 0.5) * 0.2;
+    const radius = 0.15 + rand() * 0.03;
     const index = addNode({
       id: person.id,
       kind: "person",
-      ax: clamp(companyNode.ax + Math.cos(angle) * radius * 1.1, MARGIN, 1 - MARGIN),
-      ay: clamp(companyNode.ay + Math.sin(angle) * radius * 0.9, MARGIN, 1 - MARGIN),
+      ax: clamp(companyNode.ax + Math.cos(angle) * radius * 0.9, MARGIN, 1 - MARGIN),
+      ay: clamp(companyNode.ay + Math.sin(angle) * radius, MARGIN, 1 - MARGIN),
       size: 0.05,
       phase: rand() * 6.28,
       field: person.field,
       companyId: person.companyId,
       personIndex,
     });
-    personNodeIndexes.push(index);
-    edges.push({ a: companyIndex.get(person.companyId) ?? 0, b: index, faint: false });
+    edges.push({ a: companyNodeIndex, b: index });
     const fields = companyFields.get(person.companyId) ?? new Set<NetworkField>();
     fields.add(person.field);
     companyFields.set(person.companyId, fields);
   });
-  // A few cross links between people so the web feels connected.
-  for (let i = 0; i + 3 < personNodeIndexes.length; i += 3) {
-    edges.push({ a: personNodeIndexes[i] as number, b: personNodeIndexes[i + 3] as number, faint: true });
-  }
 
-  relax(nodes);
+  relaxAnchors(nodes);
 
   for (let i = 0; i < SPARK_COUNT; i += 1) {
     addNode({
@@ -228,11 +223,9 @@ export function buildGraph(input: GraphInput, seed = 7): NetGraph {
     });
   }
 
-  const solid = edges.map((edge, index) => ({ edge, index })).filter(({ edge }) => !edge.faint);
   const pulses: Pulse[] = [];
-  for (let i = 0; i < PULSE_COUNT && solid.length > 0; i += 1) {
-    const pick = solid[Math.floor(rand() * solid.length)];
-    if (pick) pulses.push({ edge: pick.index, t: rand(), speed: 0.15 + rand() * 0.2 });
+  for (let i = 0; i < PULSE_COUNT && edges.length > 0; i += 1) {
+    pulses.push({ edge: Math.floor(rand() * edges.length), t: rand(), speed: 0.15 + rand() * 0.2 });
   }
 
   return { nodes, edges, pulses, companyFields, rand };
@@ -240,7 +233,7 @@ export function buildGraph(input: GraphInput, seed = 7): NetGraph {
 
 /** Is this node highlighted under the current field filter? */
 export function isNodeActive(graph: NetGraph, node: NetNode, field: NetworkField | null): boolean {
-  if (field === null || node.kind === "spark") return true;
+  if (field === null || node.kind === "spark" || node.kind === "seeker") return true;
   if (node.kind === "person") return node.field === field;
   return graph.companyFields.get(node.companyId ?? "")?.has(field) ?? false;
 }
@@ -256,14 +249,40 @@ export function visiblePersonIndexes(graph: NetGraph, field: NetworkField | null
   return out;
 }
 
-/** Move every node toward its drifting, pointer-attracted target. */
-export function step(graph: NetGraph, dt: number, time: number, pointer: Pointer | null): void {
+/** The edges that make up You to Company to Insider for the chosen person. */
+export function pathEdges(graph: NetGraph, personId: string | null): Set<number> {
+  const out = new Set<number>();
+  if (!personId) return out;
+  const person = graph.nodes.findIndex((n) => n.id === personId && n.kind === "person");
+  if (person < 0) return out;
+  const companyId = graph.nodes[person]?.companyId;
+  const company = graph.nodes.findIndex((n) => n.id === companyId && n.kind === "company");
+  const seeker = graph.nodes.findIndex((n) => n.kind === "seeker");
+  graph.edges.forEach((edge, index) => {
+    const touchesPerson = edge.a === person || edge.b === person;
+    const youToCompany = edge.a === seeker && edge.b === company;
+    if (touchesPerson || youToCompany) out.add(index);
+  });
+  return out;
+}
+
+/**
+ * Move every node toward its drifting, pointer-attracted target, then keep
+ * nodes from overlapping. `aspect` is the stage width divided by its height.
+ */
+export function step(
+  graph: NetGraph,
+  dt: number,
+  time: number,
+  pointer: Pointer | null,
+  aspect: number = DEFAULT_ASPECT,
+): void {
   const ease = 1 - Math.exp(-dt * 8);
   for (const node of graph.nodes) {
-    const amp = node.kind === "spark" ? 0.012 : node.kind === "hub" ? 0.004 : 0.008;
+    const amp = node.kind === "spark" ? 0.012 : node.kind === "seeker" ? 0.004 : 0.008;
     let tx = node.ax + Math.sin(time * 0.6 + node.phase) * amp;
     let ty = node.ay + Math.cos(time * 0.5 + node.phase * 1.3) * amp;
-    if (pointer && node.kind !== "hub") {
+    if (pointer && node.kind !== "seeker") {
       const dx = pointer.x - tx;
       const dy = pointer.y - ty;
       const dist = Math.hypot(dx, dy);
@@ -277,13 +296,13 @@ export function step(graph: NetGraph, dt: number, time: number, pointer: Pointer
     node.x += (tx - node.x) * ease;
     node.y += (ty - node.y) * ease;
   }
+  // Pointer pull must never stack nodes on top of one another.
+  separate(graph.nodes, false, aspect, 0.012, 0.6);
   for (const pulse of graph.pulses) {
     pulse.t += pulse.speed * dt;
     if (pulse.t > 1) {
       pulse.t -= 1;
-      const solid = graph.edges.map((edge, index) => ({ edge, index })).filter(({ edge }) => !edge.faint);
-      const pick = solid[Math.floor(graph.rand() * solid.length)];
-      if (pick) pulse.edge = pick.index;
+      pulse.edge = Math.floor(graph.rand() * graph.edges.length);
     }
   }
 }
