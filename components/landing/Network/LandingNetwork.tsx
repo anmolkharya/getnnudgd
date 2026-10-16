@@ -103,7 +103,10 @@ export function LandingNetwork() {
             const cy = other.y * h;
             const nearestX = clamp(cx, o.left, o.left + CARD_WIDTH);
             const nearestY = clamp(cy, o.top, o.top + cardHeight);
-            if (Math.hypot(cx - nearestX, cy - nearestY) < other.size * Math.min(w, h) + 4) count += 1;
+            if (Math.hypot(cx - nearestX, cy - nearestY) < other.size * Math.min(w, h) + 4) {
+              // Covering the hub or a logo costs more than covering a face.
+              count += other.kind === "hub" ? 6 : other.kind === "company" ? 3 : 1;
+            }
           }
           return count;
         };
