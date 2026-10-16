@@ -58,7 +58,7 @@ export interface Pointer {
   y: number;
 }
 
-const MARGIN = 0.07;
+const MARGIN = 0.1;
 const SPARK_COUNT = 22;
 const PULSE_COUNT = 12;
 
@@ -76,6 +76,49 @@ export function mulberry32(seed: number): () => number {
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
+}
+
+/**
+ * Push overlapping nodes apart so logos and faces never sit on top of each
+ * other. The hub stays put and companies move less than people.
+ */
+function relax(nodes: NetNode[]): void {
+  const aspect = 1.1;
+  const weight = (node: NetNode) => (node.kind === "hub" ? 0 : node.kind === "company" ? 0.35 : 1);
+  const movable = nodes.filter((n) => n.kind !== "spark");
+  for (let pass = 0; pass < 60; pass += 1) {
+    let moved = false;
+    for (let i = 0; i < movable.length; i += 1) {
+      for (let j = i + 1; j < movable.length; j += 1) {
+        const a = movable[i] as NetNode;
+        const b = movable[j] as NetNode;
+        const dx = (b.ax - a.ax) * aspect;
+        const dy = b.ay - a.ay;
+        const dist = Math.hypot(dx, dy) || 0.0001;
+        const min = (a.size + b.size) * 1.3 + 0.02;
+        if (dist >= min) continue;
+        const wa = weight(a);
+        const wb = weight(b);
+        if (wa + wb === 0) continue;
+        const push = (min - dist) / dist;
+        const share = (w: number) => w / (wa + wb);
+        a.ax -= (dx / aspect) * push * share(wa);
+        a.ay -= dy * push * share(wa);
+        b.ax += (dx / aspect) * push * share(wb);
+        b.ay += dy * push * share(wb);
+        moved = true;
+      }
+    }
+    for (const node of movable) {
+      node.ax = clamp(node.ax, MARGIN, 1 - MARGIN);
+      node.ay = clamp(node.ay, MARGIN, 1 - MARGIN);
+    }
+    if (!moved) break;
+  }
+  for (const node of movable) {
+    node.x = node.ax;
+    node.y = node.ay;
+  }
 }
 
 export function buildGraph(input: GraphInput, seed = 7): NetGraph {
@@ -96,7 +139,7 @@ export function buildGraph(input: GraphInput, seed = 7): NetGraph {
   if (hub) {
     companyIndex.set(
       hub.id,
-      addNode({ id: hub.id, kind: "hub", ax: 0.5, ay: 0.5, size: 0.075, phase: rand() * 6.28, companyId: hub.id }),
+      addNode({ id: hub.id, kind: "hub", ax: 0.5, ay: 0.5, size: 0.085, phase: rand() * 6.28, companyId: hub.id }),
     );
   }
 
@@ -110,7 +153,7 @@ export function buildGraph(input: GraphInput, seed = 7): NetGraph {
       kind: "company",
       ax: clamp(0.5 + Math.cos(angle) * 0.36, MARGIN, 1 - MARGIN),
       ay: clamp(0.5 + Math.sin(angle) * 0.34, MARGIN, 1 - MARGIN),
-      size: 0.052,
+      size: 0.06,
       phase: rand() * 6.28,
       companyId: company.id,
     });
@@ -155,7 +198,7 @@ export function buildGraph(input: GraphInput, seed = 7): NetGraph {
       kind: "person",
       ax: clamp(companyNode.ax + Math.cos(angle) * radius * 1.1, MARGIN, 1 - MARGIN),
       ay: clamp(companyNode.ay + Math.sin(angle) * radius * 0.9, MARGIN, 1 - MARGIN),
-      size: 0.04,
+      size: 0.05,
       phase: rand() * 6.28,
       field: person.field,
       companyId: person.companyId,
@@ -171,6 +214,8 @@ export function buildGraph(input: GraphInput, seed = 7): NetGraph {
   for (let i = 0; i + 3 < personNodeIndexes.length; i += 3) {
     edges.push({ a: personNodeIndexes[i] as number, b: personNodeIndexes[i + 3] as number, faint: true });
   }
+
+  relax(nodes);
 
   for (let i = 0; i < SPARK_COUNT; i += 1) {
     addNode({

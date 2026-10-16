@@ -1,4 +1,4 @@
-import type { NetworkField } from "@/src/config/landing";
+import type { AvatarLook, NetworkField } from "@/src/config/landing";
 import { isNodeActive, type NetGraph, type NetNode } from "./engine";
 
 /** Colours come from the design tokens, read once from the stage element. */
@@ -11,6 +11,12 @@ export interface Palette {
   font: string;
 }
 
+/** What a company node shows: its logo once loaded, otherwise its name. */
+export interface CompanyArt {
+  name: string;
+  image: HTMLImageElement | null;
+}
+
 export interface DrawOptions {
   width: number;
   height: number;
@@ -19,6 +25,9 @@ export interface DrawOptions {
   field: NetworkField | null;
   activeId: string | null;
   palette: Palette;
+  companyArt: ReadonlyMap<string, CompanyArt>;
+  /** Face look per person, indexed by `node.personIndex`. */
+  looks: readonly AvatarLook[];
 }
 
 export function readPalette(el: Element): Palette {
@@ -34,10 +43,16 @@ export function readPalette(el: Element): Palette {
   };
 }
 
-const PERSON_TONES = ["indigo", "amber", "success", "accent"] as const;
+// Illustration colours for the face avatars (not UI tokens).
+const SKIN = ["#F6D3B3", "#E8B88F", "#C98F63", "#A26B45", "#76472C"] as const;
+const HAIR = ["#1B1512", "#2E1D14", "#4A2F1E"] as const;
+const SHIRTS = ["#F8FAFC", "#E2E8F0", "#FDE68A", "#C7D2FE"] as const;
+const FEATURE = "#1F1A17";
+const MOUTH = "#8A3F33";
+const BACKDROPS = ["indigo", "amber", "success", "accent"] as const;
 
-function personTone(palette: Palette, personIndex: number): string {
-  return palette[PERSON_TONES[personIndex % PERSON_TONES.length] ?? "indigo"];
+function backdropFor(palette: Palette, personIndex: number): string {
+  return palette[BACKDROPS[personIndex % BACKDROPS.length] ?? "indigo"];
 }
 
 function glow(ctx: CanvasRenderingContext2D, x: number, y: number, radius: number, color: string, alpha: number) {
@@ -53,68 +68,149 @@ function glow(ctx: CanvasRenderingContext2D, x: number, y: number, radius: numbe
   ctx.restore();
 }
 
-function drawAvatar(
+function ellipse(ctx: CanvasRenderingContext2D, x: number, y: number, rx: number, ry: number, fill: string) {
+  ctx.fillStyle = fill;
+  ctx.beginPath();
+  ctx.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+/** A small illustrated face: backdrop, shoulders, neck, head, hair, eyes, smile. */
+function drawFace(
   ctx: CanvasRenderingContext2D,
   x: number,
   y: number,
   r: number,
-  tone: string,
+  look: AvatarLook,
+  personIndex: number,
   palette: Palette,
   active: boolean,
   dimmed: boolean,
 ) {
-  ctx.save();
-  ctx.globalAlpha = dimmed ? 0.22 : 1;
-  if (active) glow(ctx, x, y, r * 2.6, tone, 0.55);
+  const skin = SKIN[look.skin];
+  const hair = HAIR[personIndex % HAIR.length] ?? HAIR[0];
+  const shirt = SHIRTS[personIndex % SHIRTS.length] ?? SHIRTS[0];
 
-  // Soft illustrated portrait: tinted disc, head and shoulders.
+  ctx.save();
+  ctx.globalAlpha = dimmed ? 0.25 : 1;
+  if (active) glow(ctx, x, y, r * 2.6, backdropFor(palette, personIndex), 0.6);
+
   ctx.beginPath();
   ctx.arc(x, y, r, 0, Math.PI * 2);
   ctx.closePath();
   const disc = ctx.createLinearGradient(x, y - r, x, y + r);
-  disc.addColorStop(0, tone);
+  disc.addColorStop(0, backdropFor(palette, personIndex));
   disc.addColorStop(1, palette.ink);
   ctx.fillStyle = disc;
   ctx.fill();
 
   ctx.save();
   ctx.clip();
-  ctx.fillStyle = "rgba(255,255,255,0.92)";
+
+  // Hair that sits behind the head.
+  if (look.hair === "long") ellipse(ctx, x, y + r * 0.08, r * 0.42, r * 0.58, hair);
+  if (look.hair === "curly") ellipse(ctx, x, y - r * 0.14, r * 0.45, r * 0.48, hair);
+  if (look.hair === "bun") ellipse(ctx, x, y - r * 0.62, r * 0.18, r * 0.18, hair);
+
+  // Shoulders and neck.
+  ellipse(ctx, x, y + r * 0.98, r * 0.82, r * 0.56, shirt);
+  ctx.fillStyle = skin;
+  ctx.fillRect(x - r * 0.11, y + r * 0.1, r * 0.22, r * 0.32);
+  ctx.fillStyle = "rgba(0,0,0,0.14)";
+  ctx.fillRect(x - r * 0.11, y + r * 0.1, r * 0.22, r * 0.1);
+
+  // Head.
+  ellipse(ctx, x, y - r * 0.1, r * 0.3, r * 0.35, skin);
+
+  // Hair on top.
+  const capY = y - r * 0.31;
+  if (look.hair === "curly") {
+    ellipse(ctx, x, capY, r * 0.37, r * 0.24, hair);
+  } else {
+    ellipse(ctx, x, capY, r * 0.32, r * 0.21, hair);
+    ellipse(ctx, x - r * 0.27, y - r * 0.18, r * 0.07, r * 0.16, hair);
+    ellipse(ctx, x + r * 0.27, y - r * 0.18, r * 0.07, r * 0.16, hair);
+  }
+
+  // Eyes and smile.
+  const eyeY = y - r * 0.1;
+  const eye = Math.max(0.9, r * 0.045);
+  ctx.fillStyle = FEATURE;
   ctx.beginPath();
-  ctx.arc(x, y - r * 0.18, r * 0.3, 0, Math.PI * 2);
+  ctx.arc(x - r * 0.11, eyeY, eye, 0, Math.PI * 2);
+  ctx.arc(x + r * 0.11, eyeY, eye, 0, Math.PI * 2);
   ctx.fill();
+  ctx.strokeStyle = MOUTH;
+  ctx.lineWidth = Math.max(1, r * 0.045);
+  ctx.lineCap = "round";
   ctx.beginPath();
-  ctx.ellipse(x, y + r * 0.78, r * 0.62, r * 0.5, 0, 0, Math.PI * 2);
-  ctx.fill();
+  ctx.arc(x, y + r * 0.02, r * 0.1, Math.PI * 0.18, Math.PI * 0.82);
+  ctx.stroke();
+
+  if (look.glasses) {
+    const lens = r * 0.11;
+    ctx.strokeStyle = FEATURE;
+    ctx.lineWidth = Math.max(1, r * 0.04);
+    ctx.beginPath();
+    ctx.moveTo(x - r * 0.11 + lens, eyeY);
+    ctx.arc(x - r * 0.11, eyeY, lens, 0, Math.PI * 2);
+    ctx.moveTo(x + r * 0.11 + lens, eyeY);
+    ctx.arc(x + r * 0.11, eyeY, lens, 0, Math.PI * 2);
+    ctx.stroke();
+  }
   ctx.restore();
 
   ctx.lineWidth = active ? 2.5 : 1.5;
-  ctx.strokeStyle = active ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0.6)";
+  ctx.strokeStyle = active ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0.65)";
   ctx.beginPath();
   ctx.arc(x, y, r, 0, Math.PI * 2);
   ctx.stroke();
   ctx.restore();
 }
 
-function drawBuilding(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, ink: string) {
-  const w = r * 0.9;
-  const h = r * 1.1;
-  ctx.save();
-  ctx.fillStyle = ink;
-  ctx.fillRect(x - w / 2, y - h / 2, w, h);
-  ctx.fillStyle = "rgba(255,255,255,0.9)";
-  const cell = r * 0.18;
-  for (let row = 0; row < 3; row += 1) {
-    for (let col = 0; col < 2; col += 1) {
-      ctx.fillRect(x - w / 2 + r * 0.17 + col * (cell + r * 0.2), y - h / 2 + r * 0.17 + row * (cell + r * 0.2), cell, cell);
+/** Logo fitted inside the white disc; falls back to the company name. */
+function drawCompanyMark(
+  ctx: CanvasRenderingContext2D,
+  art: CompanyArt | undefined,
+  x: number,
+  y: number,
+  r: number,
+  palette: Palette,
+) {
+  const image = art?.image;
+  if (image && image.complete && image.naturalWidth > 0) {
+    const maxW = r * 1.7;
+    const maxH = r * 0.9;
+    const ratio = image.naturalWidth / image.naturalHeight;
+    let w = maxW;
+    let h = w / ratio;
+    if (h > maxH) {
+      h = maxH;
+      w = h * ratio;
     }
+    ctx.drawImage(image, x - w / 2, y - h / 2, w, h);
+    return;
   }
-  ctx.restore();
+  const name = art?.name ?? "";
+  if (!name) return;
+  let size = r * 0.5;
+  ctx.font = `700 ${size}px ${palette.font}`;
+  const maxWidth = r * 1.55;
+  const measured = ctx.measureText(name).width;
+  if (measured > maxWidth) {
+    size = (size * maxWidth) / measured;
+    ctx.font = `700 ${size}px ${palette.font}`;
+  }
+  ctx.fillStyle = palette.ink;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(name, x, y);
 }
 
 function drawCompany(
   ctx: CanvasRenderingContext2D,
   node: NetNode,
+  art: CompanyArt | undefined,
   x: number,
   y: number,
   r: number,
@@ -124,27 +220,27 @@ function drawCompany(
 ) {
   const hub = node.kind === "hub";
   ctx.save();
-  ctx.globalAlpha = dimmed ? 0.25 : 1;
-  glow(ctx, x, y, r * (hub ? 3.4 : 2.2), hub ? palette.accent : palette.indigo, hub ? 0.5 : 0.22);
+  ctx.globalAlpha = dimmed ? 0.28 : 1;
+  glow(ctx, x, y, r * (hub ? 3.2 : 2.1), hub ? palette.accent : palette.indigo, hub ? 0.5 : 0.22);
   ctx.beginPath();
   ctx.arc(x, y, r, 0, Math.PI * 2);
-  ctx.fillStyle = "rgba(255,255,255,0.96)";
+  ctx.fillStyle = "rgba(255,255,255,0.97)";
   ctx.fill();
-  drawBuilding(ctx, x, y, r, palette.ink);
+  drawCompanyMark(ctx, art, x, y, r, palette);
   if (hub) {
     ctx.strokeStyle = palette.indigo;
     ctx.lineWidth = 1.5;
     ctx.setLineDash([4, 7]);
     ctx.lineDashOffset = -time * 14;
     ctx.beginPath();
-    ctx.arc(x, y, r * 1.35, 0, Math.PI * 2);
+    ctx.arc(x, y, r * 1.3, 0, Math.PI * 2);
     ctx.stroke();
   }
   ctx.restore();
 }
 
 export function drawScene(ctx: CanvasRenderingContext2D, graph: NetGraph, options: DrawOptions): void {
-  const { width, height, dpr, time, field, activeId, palette } = options;
+  const { width, height, dpr, time, field, activeId, palette, companyArt, looks } = options;
   const unit = Math.min(width, height);
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, width, height);
@@ -159,7 +255,7 @@ export function drawScene(ctx: CanvasRenderingContext2D, graph: NetGraph, option
     if (!a || !b) continue;
     const live = isNodeActive(graph, a, field) && isNodeActive(graph, b, field);
     ctx.strokeStyle = "rgba(255,255,255,1)";
-    ctx.globalAlpha = live ? (edge.faint ? 0.07 : 0.16) : 0.03;
+    ctx.globalAlpha = live ? (edge.faint ? 0.08 : 0.18) : 0.03;
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(px(a), py(a));
@@ -171,8 +267,7 @@ export function drawScene(ctx: CanvasRenderingContext2D, graph: NetGraph, option
   // Sparks twinkle in the background.
   for (const node of graph.nodes) {
     if (node.kind !== "spark") continue;
-    const twinkle = 0.35 + 0.35 * Math.sin(time * 1.4 + node.phase);
-    ctx.globalAlpha = twinkle;
+    ctx.globalAlpha = 0.35 + 0.35 * Math.sin(time * 1.4 + node.phase);
     ctx.fillStyle = "#ffffff";
     ctx.beginPath();
     ctx.arc(px(node), py(node), Math.max(0.8, node.size * unit), 0, Math.PI * 2);
@@ -199,16 +294,29 @@ export function drawScene(ctx: CanvasRenderingContext2D, graph: NetGraph, option
   // Companies, then people on top.
   for (const node of graph.nodes) {
     if (node.kind !== "hub" && node.kind !== "company") continue;
-    drawCompany(ctx, node, px(node), py(node), node.size * unit, palette, time, !isNodeActive(graph, node, field));
+    drawCompany(
+      ctx,
+      node,
+      companyArt.get(node.companyId ?? ""),
+      px(node),
+      py(node),
+      node.size * unit,
+      palette,
+      time,
+      !isNodeActive(graph, node, field),
+    );
   }
   for (const node of graph.nodes) {
     if (node.kind !== "person") continue;
-    drawAvatar(
+    const index = node.personIndex ?? 0;
+    const look = looks[index] ?? { skin: 1, hair: "short" as const };
+    drawFace(
       ctx,
       px(node),
       py(node),
       node.size * unit,
-      personTone(palette, node.personIndex ?? 0),
+      look,
+      index,
       palette,
       node.id === activeId,
       !isNodeActive(graph, node, field),

@@ -47,6 +47,21 @@ describe("network engine", () => {
     }
   });
 
+  it("keeps logos and faces from sitting on top of each other", () => {
+    const graph = build();
+    const shown = graph.nodes.filter((n) => n.kind !== "spark");
+    for (let i = 0; i < shown.length; i += 1) {
+      for (let j = i + 1; j < shown.length; j += 1) {
+        const a = shown[i];
+        const b = shown[j];
+        if (!a || !b) continue;
+        const dist = Math.hypot((a.ax - b.ax) * 1.1, a.ay - b.ay);
+        // Never closer than the two radii touching.
+        expect(dist).toBeGreaterThan((a.size + b.size) * 0.95);
+      }
+    }
+  });
+
   it("only sends pulses along solid edges", () => {
     const graph = build();
     expect(graph.pulses.length).toBeGreaterThan(0);

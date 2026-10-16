@@ -249,8 +249,19 @@ export type NetworkField = (typeof networkFields)[number];
 export interface NetworkCompany {
   readonly id: string;
   readonly name: string;
+  /** Which logo from the asset manifest the node shows. */
+  readonly logoKey: LogoKey;
   /** The company at the centre of the map. Exactly one. */
   readonly hub?: boolean;
+}
+
+export type AvatarHair = "short" | "long" | "bun" | "curly";
+
+/** How an illustrated face avatar is drawn. Indexes point into fixed palettes. */
+export interface AvatarLook {
+  readonly skin: 0 | 1 | 2 | 3 | 4;
+  readonly hair: AvatarHair;
+  readonly glasses?: boolean;
 }
 
 export interface NetworkPerson {
@@ -263,6 +274,7 @@ export interface NetworkPerson {
   readonly companyId: string;
   /** Sample role-match percentage, 0 to 100. */
   readonly match: number;
+  readonly look: AvatarLook;
 }
 
 export interface NetworkConfig {
@@ -274,6 +286,7 @@ export interface NetworkConfig {
   readonly allLabel: string;
   readonly fields: readonly NetworkField[];
   readonly mapLabel: string;
+  readonly disclaimer: string;
   readonly matchLabel: string;
   readonly yearsLabel: string;
   readonly companies: readonly NetworkCompany[];
@@ -517,35 +530,36 @@ export const network = {
   headingSans: "Explore a universe of",
   headingSerif: "opportunities.",
   sub: "Real people. Real insights. Real opportunities.",
-  placeholder: true, // placeholder: sample people and companies, not live Insiders
+  placeholder: true, // placeholder: sample people at example companies, not live Insiders
   filterHeading: "Explore by field",
   allLabel: "All companies",
   fields: networkFields,
-  mapLabel: "An illustrated map of Insiders and the companies they work at.",
+  mapLabel: "An illustrated map of sample Insiders and the companies they could work at.",
+  disclaimer: `Sample profiles shown for illustration. Logos are trademarks of their respective owners. ${brand.name} is not affiliated with or endorsed by these companies.`,
   matchLabel: "role match",
   yearsLabel: "years",
   companies: [
-    { id: "product-co", name: "A product company", hub: true },
-    { id: "fintech", name: "A fintech" },
-    { id: "quick-commerce", name: "A quick-commerce app" },
-    { id: "payments", name: "A payments company" },
-    { id: "edtech", name: "An edtech" },
-    { id: "saas", name: "A SaaS company" },
-    { id: "d2c", name: "A D2C brand" },
+    { id: "razorpay", name: "Razorpay", logoKey: "logo-razorpay", hub: true },
+    { id: "phonepe", name: "PhonePe", logoKey: "logo-phonepe" },
+    { id: "zerodha", name: "Zerodha", logoKey: "logo-zerodha" },
+    { id: "freshworks", name: "Freshworks", logoKey: "logo-freshworks" },
+    { id: "groww", name: "Groww", logoKey: "logo-groww" },
+    { id: "zomato", name: "Zomato", logoKey: "logo-zomato" },
+    { id: "swiggy", name: "Swiggy", logoKey: "logo-swiggy" },
   ],
   people: [
-    { id: "priya", name: "Priya S.", role: "Senior PM", years: 5, field: "Product", companyId: "product-co", match: 91 },
-    { id: "arjun", name: "Arjun M.", role: "SDE-2", years: 4, field: "Engineering", companyId: "product-co", match: 86 },
-    { id: "neha", name: "Neha K.", role: "Product Designer", years: 6, field: "Design", companyId: "fintech", match: 88 },
-    { id: "rohan", name: "Rohan P.", role: "Backend Engineer", years: 3, field: "Engineering", companyId: "fintech", match: 84 },
-    { id: "ananya", name: "Ananya R.", role: "Data Analyst", years: 4, field: "Data", companyId: "quick-commerce", match: 90 },
-    { id: "vikram", name: "Vikram T.", role: "Growth Lead", years: 7, field: "Marketing", companyId: "quick-commerce", match: 79 },
-    { id: "isha", name: "Isha G.", role: "Product Manager", years: 5, field: "Product", companyId: "payments", match: 87 },
-    { id: "karan", name: "Karan D.", role: "Staff Engineer", years: 9, field: "Engineering", companyId: "payments", match: 82 },
-    { id: "meera", name: "Meera N.", role: "UX Researcher", years: 4, field: "Design", companyId: "edtech", match: 85 },
-    { id: "sahil", name: "Sahil B.", role: "Data Scientist", years: 6, field: "Data", companyId: "saas", match: 89 },
-    { id: "divya", name: "Divya L.", role: "Brand Manager", years: 5, field: "Marketing", companyId: "d2c", match: 80 },
-    { id: "aman", name: "Aman J.", role: "Associate PM", years: 3, field: "Product", companyId: "d2c", match: 83 },
+    { id: "priya", name: "Priya S.", role: "Senior PM", years: 5, field: "Product", companyId: "razorpay", match: 91, look: { skin: 1, hair: "long" } },
+    { id: "arjun", name: "Arjun M.", role: "SDE-2", years: 4, field: "Engineering", companyId: "razorpay", match: 86, look: { skin: 2, hair: "short", glasses: true } },
+    { id: "neha", name: "Neha K.", role: "Product Designer", years: 6, field: "Design", companyId: "phonepe", match: 88, look: { skin: 0, hair: "bun" } },
+    { id: "rohan", name: "Rohan P.", role: "Backend Engineer", years: 3, field: "Engineering", companyId: "phonepe", match: 84, look: { skin: 3, hair: "short" } },
+    { id: "ananya", name: "Ananya R.", role: "Data Analyst", years: 4, field: "Data", companyId: "zomato", match: 90, look: { skin: 2, hair: "curly" } },
+    { id: "vikram", name: "Vikram T.", role: "Growth Lead", years: 7, field: "Marketing", companyId: "zomato", match: 79, look: { skin: 1, hair: "short", glasses: true } },
+    { id: "isha", name: "Isha G.", role: "Product Manager", years: 5, field: "Product", companyId: "zerodha", match: 87, look: { skin: 0, hair: "long", glasses: true } },
+    { id: "karan", name: "Karan D.", role: "Staff Engineer", years: 9, field: "Engineering", companyId: "zerodha", match: 82, look: { skin: 3, hair: "short" } },
+    { id: "meera", name: "Meera N.", role: "UX Researcher", years: 4, field: "Design", companyId: "groww", match: 85, look: { skin: 2, hair: "bun", glasses: true } },
+    { id: "sahil", name: "Sahil B.", role: "Data Scientist", years: 6, field: "Data", companyId: "freshworks", match: 89, look: { skin: 4, hair: "curly" } },
+    { id: "divya", name: "Divya L.", role: "Brand Manager", years: 5, field: "Marketing", companyId: "swiggy", match: 80, look: { skin: 1, hair: "long" } },
+    { id: "aman", name: "Aman J.", role: "Associate PM", years: 3, field: "Product", companyId: "swiggy", match: 83, look: { skin: 3, hair: "short", glasses: true } },
   ],
 } as const satisfies NetworkConfig;
 

@@ -1,13 +1,8 @@
 .section {
   background:
-    radial-gradient(60% 55% at 72% 45%, rgb(79 70 229 / 0.2), transparent 70%),
+    linear-gradient(90deg, rgb(10 10 10 / 0.72) 0%, rgb(10 10 10 / 0.25) 55%, rgb(10 10 10 / 0.1) 100%),
+    url("/landing/backgrounds/network-bg.webp") center / cover no-repeat,
     var(--lv-ink-1);
-}
-
-.stage {
-  background:
-    radial-gradient(50% 55% at 50% 50%, rgb(99 102 241 / 0.16), transparent 72%),
-    rgb(255 255 255 / 0.02);
 }
 
 /* Floating profile card. Position is set from the canvas loop, so only the

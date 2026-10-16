@@ -33,3 +33,7 @@ Zomato, Swiggy, CRED, Flipkart, Meesho and Groww have no SVG file. They are rend
 ## Trademark notice
 
 The PD-textlogo tag marks simple text logos as public domain for copyright purposes only. Each Commons page also carries a trademark notice. The logos are trademarks of their owners. Use is for identification only, not endorsement. Non-affiliation disclaimer required on the page.
+
+## Network map background
+
+- `backgrounds/network-bg.webp`: nebula background supplied by the founder for the network map section. Original source not recorded; confirm its licence before launch.

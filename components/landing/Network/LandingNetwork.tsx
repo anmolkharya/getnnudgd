@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useId, useRef, useState, type PointerEvent } from "react";
 import { Reveal, useInView, usePrefersReducedMotion } from "@/components/motion";
 import { network, type NetworkCompany, type NetworkField, type NetworkPerson } from "@/src/config/landing";
-import { drawScene, readPalette, type Palette } from "./draw";
+import { logos } from "@/src/config/landing-assets";
+import { drawScene, readPalette, type CompanyArt, type Palette } from "./draw";
 import { buildGraph, hitTest, settle, step, visiblePersonIndexes, type Pointer } from "./engine";
 import styles from "./Network.module.css";
 
@@ -14,6 +15,7 @@ const AVATAR_TONES = ["bg-indigo-500", "bg-amber-500", "bg-emerald-500", "bg-ind
 
 const people: readonly NetworkPerson[] = network.people;
 const companies: readonly NetworkCompany[] = network.companies;
+const LOOKS = people.map((p) => p.look);
 const companyName = (id: string) => companies.find((c) => c.id === id)?.name ?? "";
 
 function clamp(value: number, min: number, max: number) {
@@ -49,6 +51,7 @@ export function LandingNetwork() {
   const sizeRef = useRef({ w: 0, h: 0, dpr: 1 });
   const paletteRef = useRef<Palette | null>(null);
   const paintRef = useRef<(() => void) | null>(null);
+  const artRef = useRef<Map<string, CompanyArt>>(new Map());
 
   useEffect(() => {
     fieldRef.current = field;
@@ -78,9 +81,43 @@ export function LandingNetwork() {
         top = h - cardHeight - 12;
       } else {
         const x = node.x * w;
+        const y = node.y * h;
         const r = node.size * Math.min(w, h);
-        left = x < w * 0.55 ? x + r + 14 : x - r - 14 - CARD_WIDTH;
-        top = node.y * h - cardHeight / 2;
+        const gap = 14;
+        const place = (l: number, t: number) => ({
+          left: clamp(l, 8, Math.max(8, w - CARD_WIDTH - 8)),
+          top: clamp(t, 8, Math.max(8, h - cardHeight - 8)),
+        });
+        // Try each side of the person and keep the one that covers the fewest other nodes.
+        const options = [
+          place(x + r + gap, y - cardHeight / 2),
+          place(x - r - gap - CARD_WIDTH, y - cardHeight / 2),
+          place(x - CARD_WIDTH / 2, y - r - gap - cardHeight),
+          place(x - CARD_WIDTH / 2, y + r + gap),
+        ];
+        const covered = (o: { left: number; top: number }) => {
+          let count = 0;
+          for (const other of graph.nodes) {
+            if (other === node || other.kind === "spark") continue;
+            const cx = other.x * w;
+            const cy = other.y * h;
+            const nearestX = clamp(cx, o.left, o.left + CARD_WIDTH);
+            const nearestY = clamp(cy, o.top, o.top + cardHeight);
+            if (Math.hypot(cx - nearestX, cy - nearestY) < other.size * Math.min(w, h) + 4) count += 1;
+          }
+          return count;
+        };
+        let best = options[0] as { left: number; top: number };
+        let bestScore = covered(best);
+        for (const option of options.slice(1)) {
+          const score = covered(option);
+          if (score < bestScore) {
+            best = option;
+            bestScore = score;
+          }
+        }
+        left = best.left;
+        top = best.top;
       }
       left = clamp(left, 8, Math.max(8, w - CARD_WIDTH - 8));
       top = clamp(top, 8, Math.max(8, h - cardHeight - 8));
@@ -99,6 +136,8 @@ export function LandingNetwork() {
         field: fieldRef.current,
         activeId: shownRef.current,
         palette,
+        companyArt: artRef.current,
+        looks: LOOKS,
       });
       positionCard();
     };
@@ -121,6 +160,29 @@ export function LandingNetwork() {
       paintRef.current = null;
     };
   }, [graph]);
+
+  // Load each company logo once, repainting as each one arrives.
+  useEffect(() => {
+    const art = artRef.current;
+    const images: HTMLImageElement[] = [];
+    for (const company of companies) {
+      const entry: CompanyArt = { name: company.name, image: null };
+      art.set(company.id, entry);
+      const asset = logos[company.logoKey];
+      if (asset.type !== "svg") continue;
+      const image = new Image();
+      image.onload = () => {
+        entry.image = image;
+        paintRef.current?.();
+      };
+      image.src = asset.src;
+      images.push(image);
+    }
+    paintRef.current?.();
+    return () => {
+      for (const image of images) image.onload = null;
+    };
+  }, []);
 
   // Reduced motion: hold every node on its anchor.
   useEffect(() => {
@@ -240,7 +302,7 @@ export function LandingNetwork() {
         <div className="min-w-0 lg:col-span-8">
           <div
             ref={boxRef}
-            className={`relative h-96 w-full overflow-hidden rounded-card-lg border border-line-dark md:h-128 lg:h-144 ${styles.stage}`}
+            className="relative h-96 w-full md:h-128 lg:h-144"
           >
             <canvas
               ref={canvasRef}
@@ -273,6 +335,7 @@ export function LandingNetwork() {
               </div>
             ) : null}
           </div>
+          <p className="mt-4 max-w-measure text-xs text-on-dark-2">{network.disclaimer}</p>
           <ul className="sr-only" aria-label={network.mapLabel}>
             {people.map((p) => (
               <li key={p.id}>

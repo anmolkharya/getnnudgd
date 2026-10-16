@@ -274,4 +274,23 @@ describe("network map content", () => {
   it("is flagged as placeholder sample data", () => {
     expect(landing.network.placeholder).toBe(true);
   });
+
+  it("gives every company a distinct logo from the logo manifest keys", () => {
+    const keys = landing.network.companies.map((c) => c.logoKey);
+    for (const key of keys) expect(landing.logoKeys).toContain(key);
+    expect(new Set(keys).size).toBe(keys.length);
+  });
+
+  it("describes every face with a valid skin tone and hair style", () => {
+    for (const person of landing.network.people) {
+      expect([0, 1, 2, 3, 4]).toContain(person.look.skin);
+      expect(["short", "long", "bun", "curly"]).toContain(person.look.hair);
+    }
+  });
+
+  it("states that the profiles are samples and the logos belong to their owners", () => {
+    expect(landing.network.disclaimer).toMatch(/sample/i);
+    expect(landing.network.disclaimer).toMatch(/trademarks/i);
+    expect(landing.network.disclaimer).toMatch(/not affiliated/i);
+  });
 });
