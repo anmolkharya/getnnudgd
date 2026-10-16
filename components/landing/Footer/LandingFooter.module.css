@@ -1,0 +1,30 @@
+/* Giant cropped wordmark: sits below the footer's bottom edge and fades out. */
+.wordmark {
+  font-size: 22vw;
+  line-height: 1;
+  transform: translateY(25%);
+  -webkit-mask-image: linear-gradient(to bottom, black 30%, transparent);
+  mask-image: linear-gradient(to bottom, black 30%, transparent);
+}
+
+@media (min-width: 1024px) {
+  .wordmark {
+    font-size: 26vw;
+  }
+}
+
+/* Photo layer is 120% tall so the parallax never reveals an edge. */
+.photo {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -10%;
+  height: 120%;
+  will-change: transform;
+}
+
+.photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
