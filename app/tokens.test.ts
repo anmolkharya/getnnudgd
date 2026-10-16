@@ -82,6 +82,11 @@ const REQUIRED_SCOPE_TOKENS = [
   "--lv-container",
   "--lv-measure",
   "--lv-pair-accent",
+  "--lv-surface-dark",
+  "--lv-surface-dark-2",
+  "--lv-tint",
+  "--lv-accent-hover",
+  "--lv-accent-on-dark",
 ];
 
 const REQUIRED_THEME_VARS = [
@@ -103,6 +108,11 @@ const REQUIRED_THEME_VARS = [
   "--color-tint-green",
   "--color-tint-orange",
   "--color-accent",
+  "--color-accent-hover",
+  "--color-accent-soft",
+  "--color-navy",
+  "--color-navy-2",
+  "--color-tint",
   "--font-heading",
   "--font-serif",
   "--font-mono",
@@ -131,7 +141,11 @@ describe(".landing-scope tokens", () => {
     expect(scopeProps.get("--lv-measure")).toBe("613px");
     expect(scopeProps.get("--lv-ink-0")).toBe("#000000");
     expect(scopeProps.get("--lv-ink-6")).toBe("#A3A3A3");
-    expect(scopeProps.get("--lv-pair-accent")).toBe("currentColor");
+    // Highlighted heading lines use the brand indigo on light surfaces.
+    expect(scopeProps.get("--lv-pair-accent")).toBe("var(--accent)");
+    // Dark sections are deep navy, never black.
+    expect(scopeProps.get("--lv-surface-dark")).toBe("#0B1020");
+    expect(scopeProps.get("--lv-accent-hover")).toBe("var(--indigo-700)");
   });
 
   it("does not declare landing-only tokens in :root", () => {
@@ -154,7 +168,7 @@ describe(".lv-dark token flips", () => {
     expect(dark.get("--fg-1")).toBe("var(--lv-paper)");
     expect(dark.get("--border")).toBe("var(--lv-line-dark)");
     expect(dark.get("--lv-focus-ring")).toBe("var(--indigo-500)");
-    expect(dark.get("--lv-pair-accent")).toBe("var(--lv-on-dark-1)");
+    expect(dark.get("--lv-pair-accent")).toBe("var(--lv-accent-on-dark)");
   });
 });
 
@@ -216,6 +230,13 @@ describe("landing helper classes", () => {
     for (const cls of ["lv-container", "lv-heading-pair", "lv-mask-x", "lv-mask-y", "lv-glass"]) {
       expect(unlayered, cls).not.toMatch(new RegExp(`\\.${cls}\\b`));
     }
+  });
+
+  it("paints dark surfaces with the navy token, not black", () => {
+    const flat = components.replace(/^\s+/gm, "");
+    const dark = blockBody(flat, ".landing-scope .lv-dark,\n.landing-scope.lv-dark");
+    expect(dark).toMatch(/background-color: var\(--lv-surface-dark\);/);
+    expect(dark).not.toMatch(/--lv-ink-1/);
   });
 
   it("styles only direct em / second children of .lv-heading-pair", () => {

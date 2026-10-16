@@ -1,8 +1,8 @@
 .section {
   background:
-    linear-gradient(90deg, rgb(10 10 10 / 0.72) 0%, rgb(10 10 10 / 0.25) 55%, rgb(10 10 10 / 0.1) 100%),
+    linear-gradient(90deg, rgb(11 16 32 / 0.72) 0%, rgb(11 16 32 / 0.25) 55%, rgb(11 16 32 / 0.1) 100%),
     url("/landing/backgrounds/network-bg.webp") center / cover no-repeat,
-    var(--lv-ink-1);
+    var(--lv-surface-dark);
 }
 
 /* Floating profile card. Position is set from the canvas loop, so only the

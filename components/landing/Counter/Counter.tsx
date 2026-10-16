@@ -24,7 +24,7 @@ export function LandingCounter() {
             value={counter.value}
             from={counter.from}
             format={format}
-            className="text-counter font-serif italic font-medium text-ink-1 tabular-nums block"
+            className="text-counter font-serif italic font-medium text-accent tabular-nums block"
           />
           <p className="mt-4 text-base text-ink-5">{counter.caption}</p>
         </div>

@@ -110,6 +110,8 @@ export interface NavConfig {
 
 export interface WordmarkConfig {
   readonly text: string;
+  /** Part of `text` shown in the brand colour. */
+  readonly highlight: string;
 }
 
 export interface HeroSlideConfig {
@@ -144,6 +146,8 @@ export interface FeatureCardConfig {
 
 export interface FeaturesConfig {
   readonly heading: string;
+  /** Part of `heading` shown in the brand colour. */
+  readonly headingHighlight: string;
   readonly sub: string;
   readonly cta: LinkItem;
   readonly cards: readonly FeatureCardConfig[];
@@ -357,6 +361,7 @@ export const nav = {
 
 export const wordmark = {
   text: `${brand.ctaGetVouched}.`,
+  highlight: `${brand.ctaGetVouched.replace(/^Get\s+/, "")}.`,
 } as const satisfies WordmarkConfig;
 
 export const heroSlides = [
@@ -436,6 +441,7 @@ export const logos = {
 
 export const features = {
   heading: "Everything you need to get vouched in",
+  headingHighlight: "vouched in",
   sub: "Tailor your resume, find an Insider at the company you want, and send a request that an Insider can act on.",
   cta: { label: brand.ctaGetVouched, href: "/login", target: "route" },
   cards: [

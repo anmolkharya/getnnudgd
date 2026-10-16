@@ -32,7 +32,7 @@ export function LandingLogos() {
                       className="h-7 w-auto grayscale opacity-60 transition hover:opacity-100 hover:grayscale-0"
                     />
                   ) : (
-                    <span className="font-heading text-lg font-semibold text-ink-5 transition hover:text-ink-1">
+                    <span className="font-heading text-lg font-semibold text-ink-5 transition hover:text-accent">
                       {item.name}
                     </span>
                   )}
