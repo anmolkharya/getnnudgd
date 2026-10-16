@@ -7,9 +7,9 @@ export default function CounterLab() {
   if (process.env.NODE_ENV === "production") notFound();
   return (
     <div className="landing-scope">
-      <div style={{ height: "120vh" }} aria-hidden="true" />
+      <div className="h-screen" aria-hidden="true" />
       <LandingCounter />
-      <div style={{ height: "120vh" }} aria-hidden="true" />
+      <div className="h-screen" aria-hidden="true" />
     </div>
   );
 }
