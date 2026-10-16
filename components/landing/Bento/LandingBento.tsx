@@ -131,7 +131,7 @@ export function LandingBento() {
           </p>
         </Reveal>
 
-        <div className="mt-14 grid gap-px overflow-hidden rounded-card-lg border border-line-dark bg-line-dark lg:grid-cols-3">
+        <div className="mt-14 grid gap-px overflow-hidden rounded-card-lg border border-line-dark bg-line-dark bg-clip-padding lg:grid-cols-3">
           {/* (a) live feed — two rows tall on lg */}
           <Cell
             title={liveFeed.title}

@@ -32,6 +32,7 @@
 }
 
 .evolve {
+  --bento-angle: 0deg;
   border: 1px solid transparent;
   background:
     linear-gradient(var(--lv-ink-1), var(--lv-ink-1)) padding-box,

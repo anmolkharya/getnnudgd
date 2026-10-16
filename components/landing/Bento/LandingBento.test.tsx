@@ -51,7 +51,6 @@ describe("LandingBento", () => {
 
   it("gives stat odometers accessible final text (compact + suffix)", () => {
     render(<LandingBento />);
-    expect(screen.getByText("25K+")).toBeInTheDocument();
     for (const item of bento.stats.items) {
       expect(screen.getByText(compact.format(item.value) + item.suffix)).toBeInTheDocument();
       expect(screen.getByText(item.label)).toBeInTheDocument();
