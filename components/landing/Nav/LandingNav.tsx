@@ -9,14 +9,17 @@ import {
   useState,
   type FocusEvent,
   type KeyboardEvent,
+  type MouseEvent as ReactMouseEvent,
   type PointerEvent,
   type ReactNode,
 } from "react";
 import { brand } from "@/src/config/brand";
 import { nav, type LinkTarget, type NavDropdownItem } from "@/src/config/landing";
 import { Logo } from "@/components/Logo";
+import { useLenis, useMediaQuery } from "@/components/motion";
 
 const HOVER_CLOSE_DELAY_MS = 120;
+const HOVER_CONFIRM_WINDOW_MS = 300;
 const FOCUSABLE = "a[href], button:not([disabled])";
 
 interface NavAnchorProps {
@@ -76,7 +79,7 @@ function ChevronIcon({ open }: { open: boolean }) {
 }
 
 const linkClass =
-  "rounded-full px-3 py-2 text-sm font-medium text-ink-1 transition-colors hover:text-accent motion-reduce:transition-none";
+  "rounded-full px-3 py-1.5 text-sm font-medium text-ink-0 transition-colors hover:bg-white/70 hover:text-ink-0 motion-reduce:transition-none";
 
 interface DropdownProps {
   readonly label: string;
@@ -88,7 +91,8 @@ function NavDropdown({ label, items }: DropdownProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const openedByHover = useRef(false);
+  const hoverOpenedAt = useRef(0);
+  const pinned = useRef(false);
   const panelId = useId();
 
   const clearTimer = useCallback(() => {
@@ -99,6 +103,10 @@ function NavDropdown({ label, items }: DropdownProps) {
   }, []);
 
   useEffect(() => clearTimer, [clearTimer]);
+
+  useEffect(() => {
+    if (!open) pinned.current = false;
+  }, [open]);
 
   // Outside click closes.
   useEffect(() => {
@@ -113,23 +121,32 @@ function NavDropdown({ label, items }: DropdownProps) {
   const onPointerEnter = (event: PointerEvent) => {
     if (event.pointerType === "touch") return;
     clearTimer();
-    openedByHover.current = true;
+    if (!open) hoverOpenedAt.current = Date.now();
     setOpen(true);
   };
   const onPointerLeave = (event: PointerEvent) => {
     if (event.pointerType === "touch") return;
     clearTimer();
+    if (pinned.current) return;
+    if (rootRef.current?.contains(document.activeElement)) return;
     closeTimer.current = setTimeout(() => setOpen(false), HOVER_CLOSE_DELAY_MS);
   };
-  const onClick = () => {
+  const onClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
     clearTimer();
-    if (open && openedByHover.current) {
-      // First click after a hover-open confirms the panel instead of closing it.
-      openedByHover.current = false;
+    const keyboard = event.detail === 0;
+    const justHoverOpened = Date.now() - hoverOpenedAt.current < HOVER_CONFIRM_WINDOW_MS;
+    if (open && !keyboard && !pinned.current && justHoverOpened) {
+      // The click right after a hover-open confirms the panel instead of closing it.
+      pinned.current = true;
       return;
     }
-    openedByHover.current = false;
-    setOpen((value) => !value);
+    if (open) {
+      pinned.current = false;
+      setOpen(false);
+    } else {
+      pinned.current = true;
+      setOpen(true);
+    }
   };
   const onKeyDown = (event: KeyboardEvent) => {
     if (event.key === "Escape" && open) {
@@ -203,6 +220,11 @@ export function LandingNav() {
   const drawerRef = useRef<HTMLDivElement>(null);
   const drawerId = useId();
   const wasOpen = useRef(false);
+  const lenis = useLenis();
+  const isDesktop = useMediaQuery("(min-width: 768px)");
+
+  // Crossing into the desktop layout (e.g. rotating a phone) closes the drawer.
+  if (isDesktop && drawerOpen) setDrawerOpen(false);
 
   const dropdown = nav.links.find((link) => link.kind === "dropdown");
 
@@ -212,17 +234,20 @@ export function LandingNav() {
   useEffect(() => {
     if (drawerOpen) {
       wasOpen.current = true;
+      const previousOverflow = document.body.style.overflow;
       document.body.style.overflow = "hidden";
+      lenis?.stop();
       closeRef.current?.focus();
       return () => {
-        document.body.style.overflow = "";
+        document.body.style.overflow = previousOverflow;
+        lenis?.start();
       };
     }
     if (wasOpen.current) {
       wasOpen.current = false;
       burgerRef.current?.focus();
     }
-  }, [drawerOpen]);
+  }, [drawerOpen, lenis]);
 
   const onDrawerKeyDown = (event: KeyboardEvent) => {
     if (event.key === "Escape") {
@@ -247,13 +272,13 @@ export function LandingNav() {
 
   return (
     <>
-      <header className="lv-glass sticky top-0 z-50 h-15 border-b border-ink-6/30">
-        <nav aria-label="Primary" className="lv-container flex h-full items-center justify-between">
-          <Link href="/" aria-label={brand.name} className="flex shrink-0 items-center">
+      <header inert={drawerOpen} className="lv-glass sticky top-0 z-50 h-15 border-b border-ink-6/30">
+        <nav aria-label="Primary" className="lv-container flex h-full items-center justify-between md:grid md:grid-cols-3">
+          <Link href="/" aria-label={brand.name} className="flex shrink-0 items-center justify-self-start">
             <span className="flex brightness-0"><Logo size="md" /></span>
           </Link>
 
-          <div className="hidden items-center gap-1 md:flex">
+          <div className="hidden items-center gap-1 justify-self-center md:flex">
             {nav.links.map((link) =>
               link.kind === "dropdown" ? (
                 <NavDropdown key={link.label} label={link.label} items={link.items} />
@@ -265,7 +290,7 @@ export function LandingNav() {
             )}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 justify-self-end">
             <NavAnchor href={nav.cta.href} target={nav.cta.target} className={`${ctaClass} hidden md:inline-flex`}>
               {nav.cta.label}
               <ArrowIcon />
@@ -295,7 +320,8 @@ export function LandingNav() {
           aria-modal="true"
           aria-label={`${brand.name} menu`}
           onKeyDown={onDrawerKeyDown}
-          className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-white md:hidden"
+          data-lenis-prevent=""
+          className="fixed inset-0 z-50 flex flex-col overflow-y-auto overscroll-contain bg-white md:hidden"
         >
           <div className="lv-container flex h-15 shrink-0 items-center justify-between">
             <Link href="/" aria-label={brand.name} onClick={closeDrawer} className="flex items-center">

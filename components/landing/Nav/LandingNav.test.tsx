@@ -1,4 +1,5 @@
 import { describe, expect, it, beforeEach, vi } from "vitest";
+import { act } from "@testing-library/react";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { LandingNav } from "./LandingNav";
@@ -157,5 +158,56 @@ describe("LandingNav mobile drawer", () => {
     await user.click(screen.getByRole("button", { name: "Open menu" }));
     unmount();
     expect(document.body.style.overflow).toBe("");
+  });
+});
+
+describe("LandingNav review fixes", () => {
+  it("closes the drawer and restores scroll when the viewport becomes desktop", async () => {
+    let desktop = false;
+    const listeners = new Set<() => void>();
+    vi.stubGlobal("matchMedia", (query: string): MediaQueryList => {
+      const list = {
+        get matches() {
+          return query.includes("min-width: 768px") ? desktop : false;
+        },
+        media: query,
+        onchange: null,
+        addEventListener: (_: string, cb: () => void) => listeners.add(cb),
+        removeEventListener: (_: string, cb: () => void) => listeners.delete(cb),
+        addListener: () => undefined,
+        removeListener: () => undefined,
+        dispatchEvent: () => false,
+      };
+      return list as unknown as MediaQueryList;
+    });
+    document.body.style.overflow = "scroll";
+    const user = userEvent.setup();
+    render(<LandingNav />);
+    await user.click(screen.getByRole("button", { name: "Open menu" }));
+    expect(document.body.style.overflow).toBe("hidden");
+    act(() => {
+      desktop = true;
+      listeners.forEach((cb) => cb());
+    });
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(document.body.style.overflow).toBe("scroll");
+  });
+
+  it("Enter closes a hover-opened panel on the first press", async () => {
+    const user = userEvent.setup();
+    render(<LandingNav />);
+    const btn = screen.getByRole("button", { name: new RegExp(dropdown.label, "i") });
+    fireEvent.pointerEnter(btn, { pointerType: "mouse" });
+    expect(btn).toHaveAttribute("aria-expanded", "true");
+    btn.focus();
+    await user.keyboard("{Enter}");
+    expect(btn).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("makes the header inert while the drawer is open", async () => {
+    const user = userEvent.setup();
+    render(<LandingNav />);
+    await user.click(screen.getByRole("button", { name: "Open menu" }));
+    expect(document.querySelector("header")).toHaveAttribute("inert");
   });
 });
