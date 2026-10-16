@@ -18,7 +18,9 @@ import styles from "./Hero.module.css";
 
 const INTERVAL_MS = 5000;
 const SWIPE_THRESHOLD_PX = 40;
-const IMAGE_SIZES = "(min-width: 1280px) 1216px, (min-width: 1024px) calc(100vw - 64px), 100vw";
+// object-cover crops a 16:9 photo into a taller box, so size by the cover height too.
+const IMAGE_SIZES =
+  "(min-width: 1280px) 1216px, (min-width: 1024px) max(calc(100vw - 64px), 142svh), max(100vw, 142svh, 924px)";
 
 /** CTA label per slide: primary CTA for /login, the nav label for other routes. */
 function ctaLabel(slide: HeroSlideConfig): string {
@@ -124,6 +126,11 @@ export function LandingHero() {
   };
 
   const onPointerDown = (e: PointerEvent<HTMLElement>) => {
+    // Swipe is for touch/pen only; a mouse drag (e.g. selecting text) must not change slides.
+    if (e.pointerType === "mouse") {
+      swipeStart.current = null;
+      return;
+    }
     swipeStart.current = { x: e.clientX, y: e.clientY };
   };
   const onPointerUp = (e: PointerEvent<HTMLElement>) => {
@@ -213,7 +220,11 @@ export function LandingHero() {
 
           <div className="absolute inset-x-0 bottom-0 flex flex-col gap-6 p-4 md:gap-8 md:p-8 lg:p-10">
             <div data-testid="hero-caption" aria-live={isPlaying ? "off" : "polite"} aria-atomic="true">
-              <div key={`${active.id}-${cycle}`} className={`${styles.caption} flex max-w-2xl flex-col items-start gap-4`}>
+              <div
+                key={`${active.id}-${cycle}`}
+                data-animate={cycle > 0 ? "true" : undefined}
+                className={`${cycle > 0 ? styles.caption : ""} flex max-w-2xl flex-col items-start gap-4`}
+              >
                 <p className="font-mono text-micro text-on-dark-1 uppercase">
                   {active.number} · {active.label}
                 </p>
@@ -244,7 +255,7 @@ export function LandingHero() {
                     aria-label={`Go to slide ${i + 1}: ${slide.label}`}
                     aria-current={i === index ? "true" : undefined}
                     aria-controls={slide.id}
-                    className="flex w-36 shrink-0 snap-start flex-col gap-3 rounded-xl border border-line-dark bg-white/10 p-3 text-left backdrop-blur-md transition-colors hover:bg-white/20 aria-[current=true]:bg-white/20 md:w-auto md:min-w-0 md:flex-1"
+                    className="flex w-36 shrink-0 snap-start flex-col gap-3 rounded-xl border border-line-dark bg-white/10 p-3 text-left backdrop-blur-md transition-colors hover:bg-white/20 aria-[current=true]:bg-white/20 lg:w-auto lg:min-w-0 lg:flex-1"
                   >
                     <span className="flex items-baseline gap-2">
                       <span className="font-mono text-micro text-on-dark-1">{slide.number}</span>
@@ -268,7 +279,7 @@ export function LandingHero() {
                   type="button"
                   onClick={togglePlay}
                   aria-pressed={userPaused}
-                  aria-label={userPaused ? "Play slideshow" : "Pause slideshow"}
+                  aria-label="Pause slideshow"
                   className={glassButton}
                 >
                   <Icon>

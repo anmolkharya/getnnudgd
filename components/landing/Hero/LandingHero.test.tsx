@@ -79,19 +79,19 @@ describe("LandingHero", () => {
     expect(visibleSlideIndex()).toBe(1);
   });
 
-  it("toggles with the pause/play button", () => {
+  it("toggles with the pause button (fixed name, aria-pressed state)", () => {
     renderInView();
     const pause = screen.getByRole("button", { name: "Pause slideshow" });
     expect(pause).toHaveAttribute("aria-pressed", "false");
     fireEvent.click(pause);
-    // Clicking moved focus? fireEvent does not focus, so only the user pause applies.
-    const play = screen.getByRole("button", { name: "Play slideshow" });
-    expect(play).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "Pause slideshow" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.queryByRole("button", { name: "Play slideshow" })).toBeNull();
     act(() => {
       vi.advanceTimersByTime(12000);
     });
     expect(visibleSlideIndex()).toBe(0);
-    fireEvent.click(play);
+    fireEvent.click(pause);
+    expect(pause).toHaveAttribute("aria-pressed", "false");
     act(() => {
       vi.advanceTimersByTime(5001);
     });
@@ -122,18 +122,35 @@ describe("LandingHero", () => {
     expect(visibleSlideIndex()).toBe(5);
   });
 
-  it("swipes with a horizontal pointer drag", () => {
+  it("swipes with a horizontal touch drag", () => {
     render(<LandingHero />);
     const root = carousel();
-    fireEvent.pointerDown(root, { clientX: 300, clientY: 100 });
-    fireEvent.pointerUp(root, { clientX: 200, clientY: 105 });
+    const touch = { pointerType: "touch" };
+    fireEvent.pointerDown(root, { ...touch, clientX: 300, clientY: 100 });
+    fireEvent.pointerUp(root, { ...touch, clientX: 200, clientY: 105 });
     expect(visibleSlideIndex()).toBe(1);
-    fireEvent.pointerDown(root, { clientX: 100, clientY: 100 });
-    fireEvent.pointerUp(root, { clientX: 220, clientY: 100 });
+    fireEvent.pointerDown(root, { ...touch, clientX: 100, clientY: 100 });
+    fireEvent.pointerUp(root, { ...touch, clientX: 220, clientY: 100 });
     expect(visibleSlideIndex()).toBe(0);
-    fireEvent.pointerDown(root, { clientX: 100, clientY: 100 });
-    fireEvent.pointerUp(root, { clientX: 120, clientY: 100 });
+    fireEvent.pointerDown(root, { ...touch, clientX: 100, clientY: 100 });
+    fireEvent.pointerUp(root, { ...touch, clientX: 120, clientY: 100 });
     expect(visibleSlideIndex()).toBe(0);
+  });
+
+  it("ignores mouse drags", () => {
+    render(<LandingHero />);
+    const root = carousel();
+    fireEvent.pointerDown(root, { pointerType: "mouse", clientX: 300, clientY: 100 });
+    fireEvent.pointerUp(root, { pointerType: "mouse", clientX: 100, clientY: 100 });
+    expect(visibleSlideIndex()).toBe(0);
+  });
+
+  it("does not replay the caption entrance on first load, only on slide changes", () => {
+    render(<LandingHero />);
+    const inner = () => screen.getByTestId("hero-caption").firstElementChild;
+    expect(inner()).not.toHaveAttribute("data-animate");
+    fireEvent.click(screen.getByRole("button", { name: "Next slide" }));
+    expect(inner()).toHaveAttribute("data-animate", "true");
   });
 
   it("does not auto-advance under reduced motion", () => {
