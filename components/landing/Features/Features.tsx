@@ -48,7 +48,7 @@ export function LandingFeatures() {
                       alt={photo.alt}
                       loading="lazy"
                       decoding="async"
-                      className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
+                      className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105 motion-reduce:scale-none motion-reduce:transition-none"
                     />
                   </picture>
 
@@ -61,7 +61,7 @@ export function LandingFeatures() {
                       alt={mock.alt}
                       loading="lazy"
                       decoding="async"
-                      className="w-3/4 max-w-xs drop-shadow-lg transition-transform duration-500 group-hover:-translate-y-1.5 motion-reduce:transform-none motion-reduce:transition-none"
+                      className="w-3/4 max-w-xs drop-shadow-lg transition-transform duration-500 group-hover:-translate-y-1.5 motion-reduce:translate-none motion-reduce:transition-none"
                     />
                   </div>
 
