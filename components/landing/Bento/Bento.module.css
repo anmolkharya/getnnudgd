@@ -14,7 +14,7 @@
 }
 
 .chipFace {
-  background: linear-gradient(160deg, var(--lv-ink-3), var(--lv-ink-1));
+  background: linear-gradient(160deg, color-mix(in oklab, var(--accent) 45%, var(--lv-surface-dark)), var(--lv-surface-dark));
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 0.12),
     inset 0 -2px 6px rgb(0 0 0 / 0.6);
@@ -35,7 +35,7 @@
   --bento-angle: 0deg;
   border: 1px solid transparent;
   background:
-    linear-gradient(var(--lv-ink-1), var(--lv-ink-1)) padding-box,
+    linear-gradient(var(--lv-surface-dark), var(--lv-surface-dark)) padding-box,
     conic-gradient(
         from var(--bento-angle),
         rgb(255 255 255 / 0.08),

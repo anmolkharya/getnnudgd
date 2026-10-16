@@ -295,7 +295,7 @@ export function LandingNetwork() {
                   type="button"
                   aria-pressed={field === option}
                   onClick={() => chooseField(field === option ? null : option)}
-                  className="rounded-full border border-line-dark px-4 py-2 text-left text-sm text-on-dark-1 transition-colors hover:bg-white/10 hover:text-white aria-pressed:border-white aria-pressed:bg-white aria-pressed:text-ink-1 lg:rounded-xl"
+                  className="rounded-full border border-line-dark px-4 py-2 text-left text-sm text-on-dark-1 transition-colors hover:bg-white/10 hover:text-white aria-pressed:border-accent aria-pressed:bg-accent aria-pressed:text-white lg:rounded-xl"
                 >
                   {option ?? network.allLabel}
                 </button>

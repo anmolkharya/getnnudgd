@@ -93,21 +93,21 @@ export function LandingFooter() {
           />
         </picture>
       </div>
-      <div aria-hidden="true" className="absolute inset-0 bg-ink-1/70" />
+      <div aria-hidden="true" className="absolute inset-0 bg-navy/70" />
       <div
         aria-hidden="true"
-        className="absolute inset-x-0 top-0 h-40 bg-linear-to-b from-ink-1 to-transparent"
+        className="absolute inset-x-0 top-0 h-40 bg-linear-to-b from-navy to-transparent"
       />
 
       <div className="lv-container relative pt-28 pb-10 md:pt-40">
         <h2 className="font-heading text-display font-medium">
-          <em className="block font-serif italic font-medium">{footer.headingSerif}</em>
+          <em className="block font-serif italic font-medium text-accent-soft">{footer.headingSerif}</em>
           <span className="block">{footer.headingSans}</span>
         </h2>
         <p className="mt-4 max-w-measure text-on-dark-1">{footer.sub}</p>
         <Link
           href={footer.cta.href}
-          className="mt-8 inline-flex rounded-full bg-white px-6 py-3 font-medium text-ink-1 transition-colors hover:bg-accent hover:text-white"
+          className="mt-8 inline-flex rounded-full bg-accent px-6 py-3 font-medium text-white transition-colors hover:bg-accent-hover"
         >
           {footer.cta.label}
         </Link>

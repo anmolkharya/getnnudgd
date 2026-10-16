@@ -8,6 +8,7 @@ export interface Palette {
   amber: string;
   success: string;
   ink: string;
+  navy: string;
   font: string;
 }
 
@@ -41,6 +42,7 @@ export function readPalette(el: Element): Palette {
     amber: read("--amber-500", "#F59E0B"),
     success: read("--success", "#10B981"),
     ink: read("--lv-ink-1", "#0A0A0A"),
+    navy: read("--lv-surface-dark", "#0B1020"),
     font: style.fontFamily || "system-ui, sans-serif",
   };
 }
@@ -102,7 +104,7 @@ function drawFace(
   ctx.closePath();
   const disc = ctx.createLinearGradient(x, y - r, x, y + r);
   disc.addColorStop(0, backdropFor(palette, personIndex));
-  disc.addColorStop(1, palette.ink);
+  disc.addColorStop(1, palette.navy);
   ctx.fillStyle = disc;
   ctx.fill();
 

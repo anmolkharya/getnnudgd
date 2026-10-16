@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Highlight } from "@/components/landing/Highlight";
 import { Reveal, Stagger } from "@/components/motion";
 import { features } from "@/src/config/landing";
 import { mocks, photos } from "@/src/config/landing-assets";
@@ -7,14 +8,16 @@ const PHOTO_SIZES = "(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw";
 
 export function LandingFeatures() {
   return (
-    <section id="how-it-works" className="bg-white">
+    <section id="how-it-works" className="bg-tint">
       <div className="lv-container py-20 md:py-28">
         <div className="max-w-measure">
-          <h2 className="text-h2-lg font-heading text-ink-1">{features.heading}</h2>
+          <h2 className="text-h2-lg font-heading text-ink-1">
+            <Highlight text={features.heading} highlight={features.headingHighlight} />
+          </h2>
           <p className="mt-4 text-base text-ink-5">{features.sub}</p>
           <Link
             href={features.cta.href}
-            className="mt-8 inline-flex rounded-full bg-ink-1 px-5 py-3 text-base text-white transition-colors hover:bg-accent"
+            className="mt-8 inline-flex rounded-full bg-accent px-5 py-3 text-base text-white transition-colors hover:bg-accent-hover"
           >
             {features.cta.label}
           </Link>
@@ -28,7 +31,7 @@ export function LandingFeatures() {
               <Reveal key={card.title}>
                 <article
                   id={card.cta.href.replace("#", "")}
-                  className="group relative aspect-4/5 scroll-mt-20 overflow-hidden rounded-card-lg bg-ink-1"
+                  className="group relative aspect-4/5 scroll-mt-20 overflow-hidden rounded-card-lg bg-navy"
                 >
                   <picture>
                     <source
@@ -65,7 +68,7 @@ export function LandingFeatures() {
                     />
                   </div>
 
-                  <div className="pointer-events-none absolute inset-x-0 bottom-0 h-3/5 bg-linear-to-t from-ink-1 via-ink-1/70 to-transparent" />
+                  <div className="pointer-events-none absolute inset-x-0 bottom-0 h-3/5 bg-linear-to-t from-navy via-navy/70 to-transparent" />
 
                   <div className="absolute inset-x-0 bottom-0 p-6">
                     <h3 className="text-h3 text-white">{card.title}</h3>

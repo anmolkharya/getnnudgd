@@ -35,7 +35,7 @@ describe("LandingFooter", () => {
     expect(screen.getByText(footer.sub)).toBeInTheDocument();
     const cta = screen.getByRole("link", { name: footer.cta.label });
     expect(cta).toHaveAttribute("href", "/login");
-    expect(cta).toHaveClass("rounded-full", "bg-white", "text-ink-1");
+    expect(cta).toHaveClass("rounded-full", "bg-accent", "text-white");
   });
 
   it("renders every footer column with its links and correct targets", () => {

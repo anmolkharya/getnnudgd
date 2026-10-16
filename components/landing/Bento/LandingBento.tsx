@@ -81,7 +81,7 @@ function Cell({
 }) {
   return (
     <div
-      className={`flex flex-col bg-ink-1 p-6 md:p-8 ${className ?? ""}`}
+      className={`flex flex-col bg-navy p-6 md:p-8 ${className ?? ""}`}
       data-placeholder={placeholder ? "" : undefined}
     >
       <h3 className="font-heading text-lg font-semibold text-white">{title}</h3>
@@ -97,7 +97,7 @@ function EvolveCell() {
   const inView = useInView(ref);
   const { evolve } = bento;
   return (
-    <div className="flex bg-ink-1 p-6 md:p-8">
+    <div className="flex bg-navy p-6 md:p-8">
       <div
         ref={ref}
         data-evolve=""
@@ -207,7 +207,7 @@ export function LandingBento() {
           <EvolveCell />
 
           {/* (d) purpose-built */}
-          <div className="flex flex-col gap-6 bg-ink-1 p-6 md:p-8 lg:col-span-3 lg:flex-row lg:items-center lg:justify-between lg:gap-12">
+          <div className="flex flex-col gap-6 bg-navy p-6 md:p-8 lg:col-span-3 lg:flex-row lg:items-center lg:justify-between lg:gap-12">
             <div className="lg:max-w-sm">
               <h3 className="font-heading text-lg font-semibold text-white">
                 {purposeBuilt.title}

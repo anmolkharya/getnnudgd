@@ -194,7 +194,7 @@ function NavDropdown({ label, items }: DropdownProps) {
                 href={item.href}
                 target={item.target}
                 onClick={() => setOpen(false)}
-                className="flex gap-4 rounded-xl p-3 transition-colors hover:bg-ink-1/5 focus-visible:bg-ink-1/5 motion-reduce:transition-none"
+                className="flex gap-4 rounded-xl p-3 transition-colors hover:bg-tint focus-visible:bg-tint motion-reduce:transition-none"
               >
                 <span className="pt-1 font-mono text-micro text-ink-5">{item.number}</span>
                 <span className="flex flex-col">
@@ -211,7 +211,7 @@ function NavDropdown({ label, items }: DropdownProps) {
 }
 
 const ctaClass =
-  "inline-flex items-center justify-center gap-2 rounded-full bg-ink-1 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent motion-reduce:transition-none";
+  "inline-flex items-center justify-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover motion-reduce:transition-none";
 
 export function LandingNav() {
   const [drawerOpen, setDrawerOpen] = useState(false);

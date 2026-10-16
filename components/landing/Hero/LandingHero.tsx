@@ -14,6 +14,7 @@ import { AutoplayProgress, useAutoplay } from "@/components/motion";
 import { brand } from "@/src/config/brand";
 import { heroSlides, nav, wordmark, type HeroSlideConfig, type LinkTarget } from "@/src/config/landing";
 import { photos } from "@/src/config/landing-assets";
+import { Highlight } from "@/components/landing/Highlight";
 import styles from "./Hero.module.css";
 
 const INTERVAL_MS = 5000;
@@ -146,10 +147,12 @@ export function LandingHero() {
 
   return (
     <>
-      <div className="lv-container pt-10 pb-8 md:pt-16">
-        <h1 className={`${styles.wordmark} text-wordmark font-heading font-medium text-ink-1 lg:whitespace-nowrap`}>
-          {wordmark.text}
-        </h1>
+      <div className="bg-linear-to-b from-tint to-transparent">
+        <div className="lv-container pt-10 pb-8 md:pt-16">
+          <h1 className={`${styles.wordmark} text-wordmark font-heading font-medium text-ink-1 lg:whitespace-nowrap`}>
+            <Highlight text={wordmark.text} highlight={wordmark.highlight} />
+          </h1>
+        </div>
       </div>
 
       <div className="lv-container max-lg:max-w-none max-lg:px-0">
@@ -157,7 +160,7 @@ export function LandingHero() {
           ref={rootRef}
           aria-roledescription="carousel"
           aria-label={`How ${brand.name} works`}
-          className={`${styles.frame} relative touch-pan-y overflow-hidden bg-ink-1 text-white lg:rounded-card-lg`}
+          className={`${styles.frame} relative touch-pan-y overflow-hidden bg-navy text-white lg:rounded-card-lg`}
           onPointerEnter={() => setHovered(true)}
           onPointerLeave={() => {
             setHovered(false);
@@ -232,7 +235,7 @@ export function LandingHero() {
                 <SmartLink
                   href={active.href}
                   target={active.target}
-                  className="mt-2 inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-medium text-ink-1 transition-colors hover:bg-accent hover:text-white"
+                  className="mt-2 inline-flex items-center gap-2 rounded-full bg-accent px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-accent-hover"
                 >
                   {ctaLabel(active)}
                   <Icon>

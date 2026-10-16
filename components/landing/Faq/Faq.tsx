@@ -5,9 +5,9 @@ import { faq } from "@/src/config/landing";
 import styles from "./Faq.module.css";
 
 const AVATARS = [
-  { tone: "bg-ink-2", initial: "A" },
-  { tone: "bg-ink-4", initial: "B" },
-  { tone: "bg-ink-5", initial: "C" },
+  { tone: "bg-accent", initial: "A" },
+  { tone: "bg-navy", initial: "B" },
+  { tone: "bg-navy-2", initial: "C" },
 ] as const;
 
 function jsonLd(): string {
@@ -36,7 +36,7 @@ export function LandingFaq() {
     });
 
   return (
-    <section id="faq" className="scroll-mt-20 bg-white">
+    <section id="faq" className="scroll-mt-20 bg-tint">
       <div className="lv-container py-24 md:py-32">
         <div className="grid gap-12 lg:grid-cols-12">
           <div className="lg:col-span-5">
@@ -58,13 +58,13 @@ export function LandingFaq() {
                     </span>
                   ))}
                 </div>
-                <span className="ml-3 rounded-full bg-ink-1 px-2.5 py-1 text-xs text-white">You</span>
+                <span className="ml-3 rounded-full bg-accent px-2.5 py-1 text-xs text-white">You</span>
               </div>
               <h3 className="mt-4 text-h3 text-ink-1">{faq.contact.title}</h3>
               <p className="mt-2 text-sm text-ink-5">{faq.contact.body}</p>
               <a
                 href={faq.contact.cta.href}
-                className="mt-6 inline-flex items-center rounded-full bg-ink-1 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-accent"
+                className="mt-6 inline-flex items-center rounded-full bg-accent px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-accent-hover"
               >
                 {faq.contact.cta.label}
               </a>
@@ -98,8 +98,8 @@ export function LandingFaq() {
                           aria-hidden="true"
                           className={`relative size-5 shrink-0 transition-transform duration-300 ${isOpen ? "rotate-45" : ""}`}
                         >
-                          <span className="absolute left-0 top-1/2 h-0.5 w-full -translate-y-1/2 bg-ink-1" />
-                          <span className="absolute left-1/2 top-0 h-full w-0.5 -translate-x-1/2 bg-ink-1" />
+                          <span className="absolute left-0 top-1/2 h-0.5 w-full -translate-y-1/2 bg-accent" />
+                          <span className="absolute left-1/2 top-0 h-full w-0.5 -translate-x-1/2 bg-accent" />
                         </span>
                       </button>
                     </h3>

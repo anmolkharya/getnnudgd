@@ -295,3 +295,12 @@ describe("network map content", () => {
     expect(landing.network.disclaimer).toMatch(/not affiliated/i);
   });
 });
+
+describe("brand highlights in headings", () => {
+  it("picks highlighted words that really appear in their headings", () => {
+    expect(landing.wordmark.text).toContain(landing.wordmark.highlight);
+    expect(landing.features.heading).toContain(landing.features.headingHighlight);
+    expect(landing.wordmark.highlight.length).toBeGreaterThan(0);
+    expect(landing.features.headingHighlight.length).toBeGreaterThan(0);
+  });
+});

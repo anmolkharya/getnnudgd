@@ -1330,13 +1330,21 @@ textarea.q-input { resize: vertical; min-height: 96px; }
   --lv-tint-green:  rgb(83 224 151 / 0.12);
   --lv-tint-orange: rgb(247 136 0 / 0.12);
 
-  /* accent (sparing: CTA hover, active dot, progress bar, focus ring) */
+  /* brand surfaces: deep navy for dark sections, pale blue for light ones */
+  --lv-surface-dark:   #0B1020;
+  --lv-surface-dark-2: #151C38;
+  --lv-tint:           var(--indigo-50);
+  --lv-accent-hover:   var(--indigo-700);
+  /* indigo-400: readable accent text on navy (about 6:1) */
+  --lv-accent-on-dark: #818CF8;
+
+  /* accent: the GetNudgd brand indigo (buttons, links, highlighted words, progress, focus ring) */
   --accent: var(--indigo-600);
   --lv-focus-ring: var(--accent);
 
   /* headings: landing headings are excluded from the legacy h1..h6 reset */
   --lv-heading-color: var(--lv-ink-1);
-  --lv-pair-accent: currentColor;
+  --lv-pair-accent: var(--accent);
 
   /* type scale */
   --lv-fs-wordmark: clamp(56px, 10vw, 148px);
@@ -1391,7 +1399,7 @@ textarea.q-input { resize: vertical; min-height: 96px; }
   --fg-muted: var(--lv-on-dark-2);
   --border: var(--lv-line-dark);
   --lv-heading-color: var(--lv-paper);
-  --lv-pair-accent: var(--lv-on-dark-1);
+  --lv-pair-accent: var(--lv-accent-on-dark);
   --lv-focus-ring: var(--indigo-500);
 }
 
@@ -1412,6 +1420,11 @@ textarea.q-input { resize: vertical; min-height: 96px; }
   --color-tint-green: var(--lv-tint-green);
   --color-tint-orange: var(--lv-tint-orange);
   --color-accent: var(--accent);
+  --color-accent-hover: var(--lv-accent-hover);
+  --color-accent-soft: var(--lv-accent-on-dark);
+  --color-navy: var(--lv-surface-dark);
+  --color-navy-2: var(--lv-surface-dark-2);
+  --color-tint: var(--lv-tint);
 
   /* font-heading = existing Jakarta display stack (named to avoid shadowing --font-display) */
   --font-heading: var(--font-display);
@@ -1464,7 +1477,7 @@ textarea.q-input { resize: vertical; min-height: 96px; }
 
   .landing-scope .lv-dark,
   .landing-scope.lv-dark {
-    background-color: var(--lv-ink-1);
+    background-color: var(--lv-surface-dark);
     color: var(--fg-2);
     color-scheme: dark;
   }
