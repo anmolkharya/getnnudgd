@@ -142,7 +142,7 @@ export function LandingFooter() {
       <Reveal y={48}>
         <div
           aria-hidden="true"
-          className={`${styles.wordmark} whitespace-nowrap text-center font-heading font-semibold text-white/90 select-none`}
+          className={`${styles.wordmark} whitespace-nowrap text-center font-heading font-semibold select-none`}
         >
           {footer.wordmark}
         </div>

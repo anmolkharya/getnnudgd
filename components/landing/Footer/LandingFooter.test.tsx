@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { LandingFooter } from "./LandingFooter";
@@ -52,6 +54,20 @@ describe("LandingFooter", () => {
         }
       }
     }
+  });
+
+  it("sizes the giant wordmark to fit the page width instead of cropping it", () => {
+    const css = readFileSync(path.resolve(__dirname, "LandingFooter.module.css"), "utf8");
+    const rule = css.slice(css.indexOf(".wordmark {"), css.indexOf("}", css.indexOf(".wordmark {")));
+    // Width-based size, so the whole word fits at every viewport.
+    expect(rule).toMatch(/font-size: calc\(\(min\(100vw, var\(--lv-container\)\)/);
+    // No shifting it below the footer edge and no mask that hides the letters.
+    expect(rule).not.toMatch(/translate/);
+    expect(rule).not.toMatch(/mask-image/);
+    // Space for the tail of the g.
+    expect(rule).toMatch(/padding-bottom/);
+    // Positioned, so it is not painted underneath the photo layer.
+    expect(rule).toMatch(/position: relative/);
   });
 
   it("renders the giant wordmark as aria-hidden", () => {
